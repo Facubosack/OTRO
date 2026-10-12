@@ -491,7 +491,7 @@ const App = {
             </div>
             <div class="task-meta-row">
               <span>📬 Ofertas recibidas:</span>
-              <strong style="color: var(--accent-cyan);">${bids.length} profesionales se postularon</strong>
+              <strong style="color: var(--brand-primary);">${bids.length} profesionales se postularon</strong>
             </div>
           </div>
 
@@ -542,7 +542,7 @@ const App = {
       bidsHtml = `
         <div class="empty-state-card" style="padding: 20px;">
           <p>Aún no hay ofertas de profesionales para este pedido.</p>
-          <span style="font-size: 0.8rem; color: var(--accent-cyan);">Los prestadores verificados de la zona recibirán una notificación.</span>
+          <span style="font-size: 0.8rem; color: var(--brand-primary);">Los prestadores verificados de la zona recibirán una notificación.</span>
         </div>
       `;
     } else {
@@ -582,7 +582,7 @@ const App = {
     }
 
     bodyEl.innerHTML = `
-      <div style="background: rgba(13, 20, 36, 0.5); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-light);">
+      <div style="background: var(--bg-subtle); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-light);">
         <div style="display: flex; gap: 8px; margin-bottom: 8px;">
           <span class="task-category-badge">${catObj.icon} ${catObj.name}</span>
           <span class="urgency-badge ${task.urgencyLevel || 'medium'}">⏱️ ${task.urgency}</span>
@@ -592,7 +592,7 @@ const App = {
         </p>
         <div style="font-size: 0.82rem; color: var(--text-muted); display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
           <div>📍 Zona: <strong>${this.escapeHTML(task.location)}</strong></div>
-          <div>💰 Presupuesto estimado: <strong style="color: #10B981;">${this.escapeHTML(task.budget)}</strong></div>
+          <div>💰 Presupuesto estimado: <strong style="color: var(--color-success);">${this.escapeHTML(task.budget)}</strong></div>
         </div>
       </div>
 

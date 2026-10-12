@@ -1,4 +1,4 @@
-const CACHE_NAME = 'otro-pwa-v1';
+const CACHE_NAME = 'otro-pwa-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -9,8 +9,8 @@ const ASSETS_TO_CACHE = [
   './js/chat.js',
   './js/pwa.js',
   './manifest.json',
-  './assets/logo.jpg',
-  './assets/hero-banner.jpg'
+  './assets/logo.svg',
+  './assets/logo.jpg'
 ];
 
 self.addEventListener('install', (event) => {

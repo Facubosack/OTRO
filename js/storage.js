@@ -22,7 +22,7 @@ const Storage = {
       localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify({
         name: 'Facundo M.',
         zone: 'Palermo, CABA',
-        avatarColor: 'linear-gradient(135deg, #00D2FF 0%, #3A7BD5 100%)',
+        avatarColor: '#EA580C',
         avatarInitials: 'FM',
         phone: '5491100000000'
       }));

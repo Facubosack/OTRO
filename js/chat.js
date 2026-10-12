@@ -12,7 +12,7 @@ const ChatEngine = {
       name: 'Especialista OTRO',
       title: 'Prestador de Servicio',
       phone: '5491100000000',
-      avatarColor: 'linear-gradient(135deg, #00D2FF 0%, #3A7BD5 100%)',
+      avatarColor: '#EA580C',
       avatarInitials: 'OT'
     };
 
@@ -28,7 +28,7 @@ const ChatEngine = {
     if (headerTitle) headerTitle.textContent = pro.name;
     if (headerSubtitle) headerSubtitle.textContent = pro.title || 'Prestador Verificado';
     if (headerAvatar) {
-      headerAvatar.style.background = pro.avatarColor || '#00D2FF';
+      headerAvatar.style.background = pro.avatarColor || '#EA580C';
       headerAvatar.textContent = pro.avatarInitials || pro.name.charAt(0);
     }
 

@@ -4,15 +4,21 @@
   "description": "¿Necesitás un servicio en tu hogar? Buscá a otro que lo haga por vos",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0B0F19",
-  "theme_color": "#00D2FF",
+  "background_color": "#FFFFFF",
+  "theme_color": "#EA580C",
   "orientation": "portrait-primary",
   "icons": [
+    {
+      "src": "assets/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
     {
       "src": "assets/logo.jpg",
       "sizes": "512x512",
       "type": "image/jpeg",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ],
   "categories": ["utilities", "lifestyle", "business"]

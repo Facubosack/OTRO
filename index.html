@@ -6,19 +6,19 @@
   <title>OTRO - ¿Necesitás un servicio en tu hogar? Buscá a otro que lo haga por vos</title>
   
   <!-- SEO & Social Meta -->
-  <meta name="description" content="¿Necesitás un servicio en tu hogar? Buscá a otro que lo haga por vos. Publicá tareas, recibí presupuestos de profesionales verificados y contactá al instante por chat o WhatsApp.">
+  <meta name="description" content="¿Necesitás un servicio en tu hogar? Buscá a otro que lo haga por vos. Publicá lo que necesitás, recibí presupuestos de vecinos y profesionales verificados, y coordiná directo por WhatsApp.">
   <meta name="keywords" content="servicios hogar, plomero, electricista, fletes, armado de muebles, limpieza, pintor, gasista, OTRO app">
-  <meta name="theme-color" content="#00D2FF">
+  <meta name="theme-color" content="#EA580C">
   
   <!-- PWA & Favicon -->
   <link rel="manifest" href="./manifest.json">
-  <link rel="icon" type="image/jpeg" href="./assets/logo.jpg">
-  <link rel="apple-touch-icon" href="./assets/logo.jpg">
+  <link rel="icon" type="image/svg+xml" href="./assets/logo.svg">
+  <link rel="apple-touch-icon" href="./assets/logo.svg">
   
-  <!-- Google Fonts -->
+  <!-- Google Fonts: Plus Jakarta Sans & Outfit -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet -->
   <link rel="stylesheet" href="./css/style.css">
@@ -27,7 +27,7 @@
 
   <!-- Offline Banner Indicator -->
   <div id="offline-indicator" class="offline-banner">
-    ⚠️ Estás sin conexión. Podés seguir navegando tus datos guardados en modo offline.
+    ⚠️ Estás sin conexión a internet. Podés seguir navegando la información guardada.
   </div>
 
   <!-- Toast Notification Container -->
@@ -40,11 +40,11 @@
     <header class="main-header">
       <div class="header-content">
         <div class="brand-wrapper" onclick="App.switchTab('feed')">
-          <img src="./assets/logo.jpg" alt="Logo OTRO" class="brand-logo-img">
+          <img src="./assets/logo.svg" alt="Logo OTRO" class="brand-logo-img">
           <div class="brand-text-col">
             <h1 class="brand-title">
-              OTRO
-              <span class="badge-pill">RED DE SERVICIOS</span>
+              OTRO<span class="logo-accent">.</span>
+              <span class="badge-pill">EN EL BARRIO</span>
             </h1>
             <span class="brand-motto">¿Necesitás un servicio en tu hogar? Buscá a otro que lo haga por vos</span>
           </div>
@@ -53,10 +53,10 @@
         <div class="header-actions">
           <!-- Segmented Role Switcher -->
           <div class="role-toggle-group">
-            <button class="role-btn active" data-role-switch="client" title="Modo Cliente: Publicar y contratar">
+            <button class="role-btn active" data-role-switch="client" title="Modo Cliente: Publicar y pedir ayuda">
               <span>👤</span> Necesito ayuda
             </button>
-            <button class="role-btn" data-role-switch="provider" title="Modo Prestador: Ver oportunidades y postularme">
+            <button class="role-btn" data-role-switch="provider" title="Modo Prestador: Ver pedidos y ofrecer servicios">
               <span>🧰</span> Soy un "Otro"
             </button>
           </div>
@@ -77,50 +77,56 @@
 
     <!-- Main Content Area -->
     <main>
-      <!-- Hero Banner Section -->
-      <section class="hero-banner-card">
-        <div class="hero-banner-content">
-          <div class="hero-tag">
-            <span class="hero-tag-pulse"></span>
-            Comunidad y Servicios para el Hogar
-          </div>
-
-          <h2 class="hero-title">
-            ¿Necesitás un servicio en tu hogar? <br>
-            <span class="gradient-highlight">Buscá a otro que lo haga por vos</span>
-          </h2>
-
-          <p class="hero-subtitle">
-            Publicá tu necesidad en 1 minuto con presupuesto estimado. Especialistas y vecinos de oficio verificados te envían ofertas directas, o explorá nuestro directorio y contactá directo por WhatsApp.
-          </p>
-
-          <div class="hero-actions-row">
-            <button class="btn-primary" data-open-publish>
-              <span>✨</span> Publicar lo que necesitás
-            </button>
-            <button class="btn-secondary" onclick="App.switchTab('pros')">
-              <span>👥</span> Ver Especialistas Verificados
-            </button>
-          </div>
-
-          <div class="hero-stats-strip">
-            <div class="stat-item">
-              <span class="stat-num">+<span>650</span></span>
-              <span class="stat-label">Profesionales verificados</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-num"><span>15</span> min</span>
-              <span class="stat-label">Tiempo promedio de oferta</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-num">★ <span>4.9</span></span>
-              <span class="stat-label">Satisfacción garantizada</span>
-            </div>
-          </div>
+      <!-- Hero Section: Cálido, Humano y Casero -->
+      <section class="hero-warm-section">
+        <div class="hero-pill-badge">
+          <span>🏡</span> Red comunitaria de servicios para el hogar
         </div>
 
-        <div class="hero-banner-media">
-          <img src="./assets/hero-banner.jpg" alt="Especialistas del hogar trabajando en el barrio">
+        <h2 class="hero-title-main">
+          ¿Necesitás un servicio en tu hogar? <br>
+          Buscá a <span class="highlight-word">otro que lo haga por vos</span>
+        </h2>
+
+        <p class="hero-desc">
+          Colgar un cuadro, reparar una pérdida de agua, pintar una pieza o armar un mueble nuevo. 
+          Publicá lo que necesitás, recibí ofertas de gente de oficio en tu zona y coordiná de forma directa.
+        </p>
+
+        <div class="hero-buttons-row">
+          <button class="btn-primary" data-open-publish style="padding: 11px 24px; font-size: 0.95rem;">
+            <span>✏️</span> Publicar lo que necesitás
+          </button>
+          <button class="btn-secondary" onclick="App.switchTab('pros')" style="padding: 10px 20px; font-size: 0.92rem;">
+            <span>👥</span> Ver Especialistas del Barrio
+          </button>
+        </div>
+
+        <!-- 3 Pilares de Confianza Cercanos -->
+        <div class="trust-pillars-row">
+          <div class="trust-pillar-card">
+            <div class="trust-icon-box">🤝</div>
+            <div class="trust-text">
+              <h4>Trato directo</h4>
+              <p>Hablás directamente por WhatsApp o chat con la persona que viene a tu casa.</p>
+            </div>
+          </div>
+
+          <div class="trust-pillar-card">
+            <div class="trust-icon-box">📍</div>
+            <div class="trust-text">
+              <h4>Gente de tu zona</h4>
+              <p>Profesionales y personas de oficio verificadas en tu mismo barrio o localidad.</p>
+            </div>
+          </div>
+
+          <div class="trust-pillar-card">
+            <div class="trust-icon-box">💬</div>
+            <div class="trust-text">
+              <h4>Presupuestos claros</h4>
+              <p>Te pasan el precio estimado antes de empezar, sin comisiones ocultas.</p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -137,7 +143,7 @@
             type="text" 
             id="search-input" 
             class="search-input" 
-            placeholder="Buscar por tarea, rubro o barrio (ej: pérdida de agua, armado de mueble, Belgrano, Lucía)..." 
+            placeholder="¿Qué necesitás resolver? Ej: pérdida de agua, colgar cortinas, pintar pieza, flete..." 
             autocomplete="off"
           >
           <button id="search-clear" class="search-clear-btn" title="Limpiar búsqueda">✕</button>
@@ -154,14 +160,14 @@
       <!-- Navigation Tabs Bar -->
       <nav class="nav-tabs-bar">
         <button class="tab-btn active" data-tab="feed">
-          <span>📋</span> Pedidos de la Comunidad
+          <span>📋</span> Pedidos del Barrio
           <span id="tab-feed-badge" class="tab-badge">0</span>
         </button>
         <button class="tab-btn" data-tab="pros">
-          <span>👥</span> Directorio de "Otros" (Especialistas)
+          <span>👥</span> Especialistas ("Otros")
         </button>
         <button class="tab-btn" data-tab="my-tasks">
-          <span>📌</span> Mis Pedidos y Ofertas
+          <span>📌</span> Mis Pedidos
           <span id="tab-my-tasks-badge" class="tab-badge">0</span>
         </button>
       </nav>
@@ -170,11 +176,11 @@
       <section id="tasks-feed-section">
         <div class="section-header-row">
           <h2 class="section-title">
-            <span>⚡</span> Pedidos Activos para el Hogar
+            <span>📌</span> Tareas y pedidos abiertos
           </h2>
           <div class="section-actions">
-            <button class="btn-secondary" style="font-size: 0.8rem;" onclick="Storage.resetDemo()">
-              🔄 Restaurar Datos Demo
+            <button class="btn-secondary" style="font-size: 0.8rem; padding: 6px 12px;" onclick="Storage.resetDemo()">
+              🔄 Restaurar datos de prueba
             </button>
           </div>
         </div>
@@ -187,7 +193,7 @@
       <section id="pros-directory-section" style="display: none;">
         <div class="section-header-row">
           <h2 class="section-title">
-            <span>🛡️</span> Prestadores Calificados con Garantía OTRO
+            <span>🛡️</span> Especialistas y personas de confianza
           </h2>
         </div>
         <div id="pros-directory-grid" class="pros-grid">
@@ -199,10 +205,10 @@
       <section id="my-tasks-section" style="display: none;">
         <div class="section-header-row">
           <h2 class="section-title">
-            <span>💼</span> Mis Pedidos Publicados
+            <span>💼</span> Mis pedidos publicados
           </h2>
           <button class="btn-primary" data-open-publish style="font-size: 0.82rem; padding: 6px 14px;">
-            <span>➕</span> Nueva Publicación
+            <span>➕</span> Nuevo pedido
           </button>
         </div>
         <div id="my-tasks-grid" class="tasks-grid">
@@ -221,14 +227,14 @@
       <div class="modal-header">
         <div class="modal-header-left">
           <span style="font-size: 1.3rem;">📝</span>
-          <h3>¿Qué necesitás que otro haga por vos?</h3>
+          <h3>¿Qué necesitás que hagan en tu hogar?</h3>
         </div>
         <button class="modal-close-btn" data-close-modal title="Cerrar">✕</button>
       </div>
 
       <form id="new-task-form" class="modal-body">
         <div class="form-group">
-          <label class="form-label" for="task-title-input">¿Qué tarea necesitás resolver? *</label>
+          <label class="form-label" for="task-title-input">¿Qué hay que hacer? *</label>
           <input 
             type="text" 
             id="task-title-input" 
@@ -240,29 +246,29 @@
 
         <div class="form-row-2">
           <div class="form-group">
-            <label class="form-label" for="task-category-select">Rubro / Oficio</label>
+            <label class="form-label" for="task-category-select">Rubro</label>
             <select id="task-category-select" class="form-select">
               <!-- Dynamically populated -->
             </select>
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="task-urgency-select">¿Cuándo lo necesitás?</label>
+            <label class="form-label" for="task-urgency-select">¿Para cuándo lo necesitás?</label>
             <select id="task-urgency-select" class="form-select">
               <option value="Urgente (Hoy)">🔥 Urgente (Hoy mismo)</option>
               <option value="En 24 a 48 hs" selected>⏳ En 24 a 48 hs</option>
               <option value="Este fin de semana">📅 Este fin de semana</option>
-              <option value="Fecha flexible">🕒 Fecha flexible</option>
+              <option value="Fecha flexible">🕒 Sin apuro / Fecha flexible</option>
             </select>
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="task-desc-input">Detalles o especificaciones *</label>
+          <label class="form-label" for="task-desc-input">Detalles o aclaraciones *</label>
           <textarea 
             id="task-desc-input" 
             class="form-textarea" 
-            placeholder="Describí medidas, tipo de pared, si tenés repuestos o necesitás que los traiga el prestador..." 
+            placeholder="Contá qué herramientas se precisan, si tenés los materiales o repuestos, medidas aproximadas..." 
             required
           ></textarea>
         </div>
@@ -274,19 +280,19 @@
               type="text" 
               id="task-location-input" 
               class="form-input" 
-              placeholder="Ej: Palermo Soho, Belgrano, etc." 
+              placeholder="Ej: Palermo, Belgrano, Caballito..." 
               value="Palermo Soho, CABA"
               required
             >
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="task-budget-input">Presupuesto estimado que podés pagar</label>
+            <label class="form-label" for="task-budget-input">Presupuesto estimado</label>
             <input 
               type="text" 
               id="task-budget-input" 
               class="form-input" 
-              placeholder="Ej: $20.000 - $30.000 o A convenir" 
+              placeholder="Ej: $25.000 o A convenir" 
               value="$25.000 - $35.000"
             >
           </div>
@@ -295,7 +301,7 @@
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
           <button type="button" class="btn-secondary" data-close-modal>Cancelar</button>
           <button type="submit" class="btn-primary">
-            <span>🚀</span> Publicar Pedido en OTRO
+            <span>🚀</span> Publicar en el barrio
           </button>
         </div>
       </form>
@@ -310,7 +316,7 @@
       <div class="modal-header">
         <div class="modal-header-left">
           <span style="font-size: 1.3rem;">📋</span>
-          <h3 id="detail-modal-title">Detalle de la Tarea</h3>
+          <h3 id="detail-modal-title">Detalle del pedido</h3>
         </div>
         <button class="modal-close-btn" data-close-modal title="Cerrar">✕</button>
       </div>
@@ -330,7 +336,7 @@
         <div class="modal-header-left">
           <span style="font-size: 1.3rem;">⚡</span>
           <div>
-            <h3 style="font-size: 1.05rem;">Postularme a esta tarea</h3>
+            <h3 style="font-size: 1.05rem;">Pasar presupuesto a este pedido</h3>
             <p id="bid-target-task-title" style="font-size: 0.78rem; color: var(--text-muted);"></p>
           </div>
         </div>
@@ -339,23 +345,23 @@
 
       <form id="submit-bid-form" class="modal-body">
         <div class="form-group">
-          <label class="form-label" for="bid-amount-input">Tu valor presupuestado ($)</label>
+          <label class="form-label" for="bid-amount-input">Tu presupuesto estimado ($)</label>
           <input 
             type="text" 
             id="bid-amount-input" 
             class="form-input" 
-            placeholder="Ej: 32000" 
+            placeholder="Ej: 28000" 
             required
           >
-          <span style="font-size: 0.72rem; color: var(--text-subtle);">Monto total estimado por la mano de obra del trabajo</span>
+          <span style="font-size: 0.74rem; color: var(--text-muted);">Monto orientativo por la mano de obra</span>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="bid-message-input">Mensaje para el solicitante</label>
+          <label class="form-label" for="bid-message-input">Mensaje para el vecino</label>
           <textarea 
             id="bid-message-input" 
             class="form-textarea" 
-            placeholder="Contale cuándo podés pasar, qué herramientas llevás y si ofrecés garantía..." 
+            placeholder="Contale cuándo podés pasar, qué herramientas llevás y si das garantía por el trabajo..." 
             required
           ></textarea>
         </div>
@@ -363,7 +369,7 @@
         <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
           <button type="button" class="btn-secondary" data-close-modal>Cancelar</button>
           <button type="submit" class="btn-primary">
-            <span>📨</span> Enviar Propuesta al Cliente
+            <span>📨</span> Enviar presupuesto
           </button>
         </div>
       </form>
@@ -371,7 +377,7 @@
   </div>
 
   <!-- ========================================================
-       MODAL 4: CHAT INTERACTIVO CON EL PRESTADOR / WHATSAPP
+       MODAL 4: CHAT DIRECTO / WHATSAPP
        ======================================================== -->
   <div id="chat-modal" class="modal-overlay">
     <div class="modal-window chat-window">
@@ -382,12 +388,12 @@
           </div>
           <div>
             <h3 id="chat-pro-name" style="font-size: 1.05rem; line-height: 1.2;">Matías Benítez</h3>
-            <div id="chat-pro-title" style="font-size: 0.75rem; color: var(--accent-cyan);">Plomero Matriculado</div>
+            <div id="chat-pro-title" style="font-size: 0.78rem; color: var(--brand-primary); font-weight: 600;">Plomero Matriculado</div>
           </div>
         </div>
 
         <div style="display: flex; align-items: center; gap: 8px;">
-          <button id="chat-whatsapp-btn" class="btn-contact-wa" style="padding: 4px 10px; font-size: 0.75rem;" title="Abrir chat directo en WhatsApp">
+          <button id="chat-whatsapp-btn" class="btn-contact-wa" style="padding: 5px 12px; font-size: 0.78rem;" title="Abrir chat en WhatsApp">
             <span>💬</span> WhatsApp
           </button>
           <button id="chat-close-btn" class="modal-close-btn" title="Cerrar chat">✕</button>
@@ -414,18 +420,18 @@
   </div>
 
   <!-- ========================================================
-       PWA INSTALL PROMPT BANNER
+       BANNER DE INSTALACIÓN PWA
        ======================================================== -->
   <div id="pwa-install-banner" class="pwa-banner">
     <div class="pwa-banner-info">
-      <img src="./assets/logo.jpg" alt="Icono OTRO" class="pwa-banner-icon">
+      <img src="./assets/logo.svg" alt="Icono OTRO" class="pwa-banner-icon">
       <div class="pwa-banner-text">
-        <h4>Instalar OTRO en tu dispositivo</h4>
-        <p>Accedé en un toque a los mejores servicios para el hogar</p>
+        <h4>Instalar OTRO en tu teléfono</h4>
+        <p>Buscá a otro que lo haga por vos en un toque</p>
       </div>
     </div>
     <div class="pwa-banner-actions">
-      <button id="pwa-install-action-btn" class="btn-primary" style="padding: 6px 12px; font-size: 0.78rem;">
+      <button id="pwa-install-action-btn" class="btn-primary" style="padding: 6px 14px; font-size: 0.78rem;">
         Instalar
       </button>
       <button id="pwa-install-close-btn" class="modal-close-btn" style="font-size: 1rem;">✕</button>
@@ -433,7 +439,7 @@
   </div>
 
   <!-- ========================================================
-       MOBILE BOTTOM NAVIGATION BAR
+       BARRA DE NAVEGACIÓN MÓVIL
        ======================================================== -->
   <nav class="mobile-bottom-bar">
     <button class="nav-bottom-item active" data-tab="feed">
@@ -442,10 +448,10 @@
     </button>
     <button class="nav-bottom-item" data-tab="pros">
       <span class="icon">👥</span>
-      <span>Otros (Pros)</span>
+      <span>Otros</span>
     </button>
-    <button class="nav-bottom-item" data-open-publish style="color: var(--accent-cyan); font-weight: 700;">
-      <span class="icon" style="font-size: 1.5rem; line-height: 1;">➕</span>
+    <button class="nav-bottom-item" data-open-publish style="color: var(--brand-primary); font-weight: 700;">
+      <span class="icon" style="font-size: 1.45rem; line-height: 1;">➕</span>
       <span>Publicar</span>
     </button>
     <button class="nav-bottom-item" data-tab="my-tasks">

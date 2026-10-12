@@ -1,0 +1,117 @@
+# 🗺️ Hoja de Ruta y Estado del Proyecto: OTRO
+
+> **Lema:** *"¿Necesitás un servicio en tu hogar? Buscá a otro que lo haga por vos"*  
+> **Repositorio:** [https://github.com/Facubosack/OTRO](https://github.com/Facubosack/OTRO)  
+> **Versión actual:** v0.2.0 (MVP Frontend Funcional & PWA)
+
+---
+
+## 📊 Estado Actual del Proyecto
+
+Este documento detalla qué funcionalidades ya están desarrolladas, qué aspectos funcionan de forma simulada y cuáles son las tareas pendientes para continuar el desarrollo.
+
+```mermaid
+pie title Estado de Funcionalidades
+    "Hecho y Operativo" : 55
+    "Simulado / Local" : 20
+    "Pendiente para Producción" : 25
+```
+
+---
+
+## ✅ 1. Lo que ya está hecho y funcionando
+
+### 🎨 Interfaz & Experiencia de Usuario (UI/UX)
+- [x] **Diseño cálido, blanco y casero:** Interfaz luminosa en blanco puro (`#FFFFFF`) y slate suave (`#F8FAFC`) con acento naranja artesanal (`#EA580C`). Sin aspecto artificial ni neones futuristas.
+- [x] **Identidad visual:** Logo vectorial amigable en SVG ([`assets/logo.svg`](./assets/logo.svg)) que representa un hogar y apretón de manos.
+- [x] **Hero section barrial:** Pilares de confianza (Trato directo, Gente de tu zona y Presupuestos claros).
+- [x] **Buscador interactivo:** Filtro en tiempo real por palabra clave, tarea o barrio (con botón para limpiar búsqueda).
+- [x] **Carrusel de rubros:** 10 categorías del hogar con iconos, contadores dinámicos de pedidos abiertos y filtro interactivo.
+- [x] **Navegación por pestañas:**
+  - *Pedidos del Barrio* (feed en vivo de solicitudes de vecinos).
+  - *Especialistas ("Otros")* (directorio de prestadores verificados).
+  - *Mis Pedidos* (gestión de solicitudes del usuario activo).
+- [x] **Diseño 100% responsivo:** Optimizado tanto para escritorio como para celulares (con barra de navegación inferior fija estilo app nativa).
+
+### ⚙️ Lógica de la Plataforma
+- [x] **Publicación de pedidos:** Formulario completo para solicitar ayuda (título, rubro, fecha/urgencia, descripción, barrio y presupuesto estimado).
+- [x] **Directorio de prestadores:** Tarjetas con oficios, rating en estrellas, cantidad de trabajos, tarifa orientativa, habilidades y reseñas de vecinos.
+- [x] **Sistema de presupuestos y postulaciones:**
+  - Los prestadores pueden postularse enviando monto ofertado ($) y mensaje explicativo.
+  - El solicitante puede ver las ofertas recibidas y aceptar un presupuesto con un clic.
+- [x] **Integración con WhatsApp:** Botón que abre directamente WhatsApp (`wa.me`) con el número del prestador y el texto prearmado con los datos de la tarea.
+- [x] **Modo Dual (Switch de Rol):** Alternador inmediato entre *Modo Cliente* ("Necesito ayuda") y *Modo Prestador* ("Soy un Otro").
+
+### 📱 PWA & Código
+- [x] **Progressive Web App (PWA):** `manifest.json`, iconos y Service Worker ([`sw.js`](./sw.js)) con soporte offline y aviso de instalación en pantalla de inicio.
+- [x] **Estructura modular en JavaScript:** Separado en `data.js`, `storage.js`, `chat.js`, `pwa.js` y `app.js`.
+- [x] **Repositorio Git sincronizado:** Rama `main` en GitHub.
+
+---
+
+## ⚠️ 2. Lo que hoy está simulado / funciona a nivel local
+
+- [x] **Persistencia en `localStorage`:** Los pedidos y cambios se guardan en la memoria local del navegador. Si otra persona abre la app desde otro dispositivo, no ve los pedidos creados por vos aún.
+- [x] **Chat interno de prueba:** El modal de mensajería responde automáticamente con respuestas contextuales simuladas (aunque el botón de WhatsApp sí redirige a la app real).
+- [x] **Perfil fijo:** El usuario activo está definido por defecto como *"Facundo M."* (sin pantalla de inicio de sesión).
+
+---
+
+## 📋 3. Backlog: Próximos pasos a seguir
+
+A continuación se detallan las etapas pendientes para convertir el prototipo en una plataforma real en la calle:
+
+### 🚀 Fase 1: Publicación en Internet (Deploy Público)
+- [ ] Subir la app a un hosting gratuito con SSL:
+  - **Opción recomendada:** Conectar el repositorio de GitHub con **Vercel** o **GitHub Pages**.
+  - Permite tener una URL pública (ej: `https://otro-app.vercel.app`) para probarla directamente desde el celular y compartirla.
+
+### ☁️ Fase 2: Base de Datos en la Nube (Multi-usuario real)
+- [ ] Reemplazar `localStorage` por una base de datos en tiempo real:
+  - **Opciones recomendadas:** **Supabase** (PostgreSQL) o **Firebase Firestore**.
+  - Colección `tasks` (pedidos abiertos y postulaciones sincronizadas al instante entre todos los teléfonos).
+  - Colección `pros` (directorio de especialistas administrable).
+  - Colección `bids` (presupuestos enviados en tiempo real).
+
+### 🔐 Fase 3: Registro y Autenticación de Usuarios
+- [ ] Pantalla de registro e inicio de sesión:
+  - Login con Google (1 clic) o número de teléfono vía SMS / WhatsApp OTP.
+  - Perfil configurable: Nombre, foto de perfil, barrio/zona de cobertura y número de teléfono de contacto.
+  - Flujo de registro para prestadores: selección de oficios, tarifas y verificación de identidad.
+
+### 🔔 Fase 4: Notificaciones y Geolocalización
+- [ ] **Notificaciones Push (Web Push):**
+  - Avisar al prestador: *"Hay un nuevo pedido de electricidad en tu barrio"*.
+  - Avisar al cliente: *"Matías te envió un presupuesto para tu pedido"*.
+- [ ] **Geolocalización automática:** Detección de barrio o distancia en kilómetros entre el cliente y el prestador.
+
+### 💳 Fase 5: Expansión y Mejoras Opcionales
+- [ ] Galería de fotos reales de antes/después en los perfiles de los prestadores.
+- [ ] Sistema de reseñas y calificaciones reales después de marcar una tarea como completada.
+- [ ] Integración opcional de pagos/señas con Mercado Pago.
+
+---
+
+## 🛠️ ¿Cómo retomar el proyecto en la próxima sesión?
+
+1. **Abrir la carpeta del proyecto en la terminal:**
+   ```bash
+   cd C:\Users\facun\.gemini\antigravity-ide\scratch\otro
+   ```
+
+2. **Iniciar el servidor local para probar cambios:**
+   ```bash
+   python -m http.server 3000
+   # O si usás Node:
+   npx serve . -l 3000
+   ```
+
+3. **Abrir en el navegador:**
+   [http://localhost:3000](http://localhost:3000)
+
+4. **Sincronizar cambios en GitHub:**
+   ```bash
+   git add .
+   git commit -m "feat: descripción de los cambios"
+   git push origin main
+   ```

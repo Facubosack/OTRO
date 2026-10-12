@@ -58,3 +58,11 @@ python -m http.server 3000
 # O con Node.js / npx:
 npx serve . -l 3000
 ```
+
+---
+
+## 🗺️ Hoja de Ruta y Próximos Pasos
+
+Para consultar el estado actual del proyecto, qué aspectos están listos, qué está simulado y el backlog priorizado para continuar el desarrollo, consultá el archivo:
+👉 [**ROADMAP.md**](./ROADMAP.md)
+

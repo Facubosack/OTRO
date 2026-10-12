@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>OTRO - ¿Necesitás un servicio en tu hogar? Buscá a otro que lo haga por vos</title>
+  
+  <!-- SEO & Social Meta -->
+  <meta name="description" content="¿Necesitás un servicio en tu hogar? Buscá a otro que lo haga por vos. Publicá tareas, recibí presupuestos de profesionales verificados y contactá al instante por chat o WhatsApp.">
+  <meta name="keywords" content="servicios hogar, plomero, electricista, fletes, armado de muebles, limpieza, pintor, gasista, OTRO app">
+  <meta name="theme-color" content="#00D2FF">
+  
+  <!-- PWA & Favicon -->
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/jpeg" href="./assets/logo.jpg">
+  <link rel="apple-touch-icon" href="./assets/logo.jpg">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+
+  <!-- Offline Banner Indicator -->
+  <div id="offline-indicator" class="offline-banner">
+    ⚠️ Estás sin conexión. Podés seguir navegando tus datos guardados en modo offline.
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Main Application Wrapper -->
+  <div class="app-container">
+
+    <!-- Top Sticky Header -->
+    <header class="main-header">
+      <div class="header-content">
+        <div class="brand-wrapper" onclick="App.switchTab('feed')">
+          <img src="./assets/logo.jpg" alt="Logo OTRO" class="brand-logo-img">
+          <div class="brand-text-col">
+            <h1 class="brand-title">
+              OTRO
+              <span class="badge-pill">RED DE SERVICIOS</span>
+            </h1>
+            <span class="brand-motto">¿Necesitás un servicio en tu hogar? Buscá a otro que lo haga por vos</span>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <!-- Segmented Role Switcher -->
+          <div class="role-toggle-group">
+            <button class="role-btn active" data-role-switch="client" title="Modo Cliente: Publicar y contratar">
+              <span>👤</span> Necesito ayuda
+            </button>
+            <button class="role-btn" data-role-switch="provider" title="Modo Prestador: Ver oportunidades y postularme">
+              <span>🧰</span> Soy un "Otro"
+            </button>
+          </div>
+
+          <!-- Publish Task Action Button -->
+          <button class="btn-primary" data-open-publish>
+            <span>➕</span>
+            <span>Publicar Tarea</span>
+          </button>
+
+          <!-- User Profile Avatar -->
+          <div class="user-avatar-btn" title="Perfil: Facundo M.">
+            FM
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main>
+      <!-- Hero Banner Section -->
+      <section class="hero-banner-card">
+        <div class="hero-banner-content">
+          <div class="hero-tag">
+            <span class="hero-tag-pulse"></span>
+            Comunidad y Servicios para el Hogar
+          </div>
+
+          <h2 class="hero-title">
+            ¿Necesitás un servicio en tu hogar? <br>
+            <span class="gradient-highlight">Buscá a otro que lo haga por vos</span>
+          </h2>
+
+          <p class="hero-subtitle">
+            Publicá tu necesidad en 1 minuto con presupuesto estimado. Especialistas y vecinos de oficio verificados te envían ofertas directas, o explorá nuestro directorio y contactá directo por WhatsApp.
+          </p>
+
+          <div class="hero-actions-row">
+            <button class="btn-primary" data-open-publish>
+              <span>✨</span> Publicar lo que necesitás
+            </button>
+            <button class="btn-secondary" onclick="App.switchTab('pros')">
+              <span>👥</span> Ver Especialistas Verificados
+            </button>
+          </div>
+
+          <div class="hero-stats-strip">
+            <div class="stat-item">
+              <span class="stat-num">+<span>650</span></span>
+              <span class="stat-label">Profesionales verificados</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-num"><span>15</span> min</span>
+              <span class="stat-label">Tiempo promedio de oferta</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-num">★ <span>4.9</span></span>
+              <span class="stat-label">Satisfacción garantizada</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-banner-media">
+          <img src="./assets/hero-banner.jpg" alt="Especialistas del hogar trabajando en el barrio">
+        </div>
+      </section>
+
+      <!-- Active Role Callout Banner -->
+      <div id="role-callout-banner" class="role-callout">
+        <!-- Rendered dynamically by JS -->
+      </div>
+
+      <!-- Search & Category Filters Bar -->
+      <section class="search-filter-section">
+        <div class="search-box-wrapper">
+          <span class="search-icon">🔍</span>
+          <input 
+            type="text" 
+            id="search-input" 
+            class="search-input" 
+            placeholder="Buscar por tarea, rubro o barrio (ej: pérdida de agua, armado de mueble, Belgrano, Lucía)..." 
+            autocomplete="off"
+          >
+          <button id="search-clear" class="search-clear-btn" title="Limpiar búsqueda">✕</button>
+        </div>
+
+        <!-- Horizontal scroll of category chips -->
+        <div class="categories-nav-wrapper">
+          <div id="categories-nav" class="categories-scroll">
+            <!-- Categories rendered dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Navigation Tabs Bar -->
+      <nav class="nav-tabs-bar">
+        <button class="tab-btn active" data-tab="feed">
+          <span>📋</span> Pedidos de la Comunidad
+          <span id="tab-feed-badge" class="tab-badge">0</span>
+        </button>
+        <button class="tab-btn" data-tab="pros">
+          <span>👥</span> Directorio de "Otros" (Especialistas)
+        </button>
+        <button class="tab-btn" data-tab="my-tasks">
+          <span>📌</span> Mis Pedidos y Ofertas
+          <span id="tab-my-tasks-badge" class="tab-badge">0</span>
+        </button>
+      </nav>
+
+      <!-- VIEW 1: FEED OF TASKS / PEDIDOS -->
+      <section id="tasks-feed-section">
+        <div class="section-header-row">
+          <h2 class="section-title">
+            <span>⚡</span> Pedidos Activos para el Hogar
+          </h2>
+          <div class="section-actions">
+            <button class="btn-secondary" style="font-size: 0.8rem;" onclick="Storage.resetDemo()">
+              🔄 Restaurar Datos Demo
+            </button>
+          </div>
+        </div>
+        <div id="tasks-feed-grid" class="tasks-grid">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+
+      <!-- VIEW 2: PROS DIRECTORY ("LOS OTROS") -->
+      <section id="pros-directory-section" style="display: none;">
+        <div class="section-header-row">
+          <h2 class="section-title">
+            <span>🛡️</span> Prestadores Calificados con Garantía OTRO
+          </h2>
+        </div>
+        <div id="pros-directory-grid" class="pros-grid">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+
+      <!-- VIEW 3: MY TASKS & ACTIVITY -->
+      <section id="my-tasks-section" style="display: none;">
+        <div class="section-header-row">
+          <h2 class="section-title">
+            <span>💼</span> Mis Pedidos Publicados
+          </h2>
+          <button class="btn-primary" data-open-publish style="font-size: 0.82rem; padding: 6px 14px;">
+            <span>➕</span> Nueva Publicación
+          </button>
+        </div>
+        <div id="my-tasks-grid" class="tasks-grid">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+    </main>
+
+  </div><!-- /app-container -->
+
+  <!-- ========================================================
+       MODAL 1: PUBLICAR NUEVA TAREA / PEDIDO
+       ======================================================== -->
+  <div id="publish-task-modal" class="modal-overlay">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <span style="font-size: 1.3rem;">📝</span>
+          <h3>¿Qué necesitás que otro haga por vos?</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal title="Cerrar">✕</button>
+      </div>
+
+      <form id="new-task-form" class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="task-title-input">¿Qué tarea necesitás resolver? *</label>
+          <input 
+            type="text" 
+            id="task-title-input" 
+            class="form-input" 
+            placeholder="Ej: Colgar 2 cuadros y espejo pesado con taladro" 
+            required
+          >
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label" for="task-category-select">Rubro / Oficio</label>
+            <select id="task-category-select" class="form-select">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="task-urgency-select">¿Cuándo lo necesitás?</label>
+            <select id="task-urgency-select" class="form-select">
+              <option value="Urgente (Hoy)">🔥 Urgente (Hoy mismo)</option>
+              <option value="En 24 a 48 hs" selected>⏳ En 24 a 48 hs</option>
+              <option value="Este fin de semana">📅 Este fin de semana</option>
+              <option value="Fecha flexible">🕒 Fecha flexible</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="task-desc-input">Detalles o especificaciones *</label>
+          <textarea 
+            id="task-desc-input" 
+            class="form-textarea" 
+            placeholder="Describí medidas, tipo de pared, si tenés repuestos o necesitás que los traiga el prestador..." 
+            required
+          ></textarea>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label" for="task-location-input">Tu barrio o localidad</label>
+            <input 
+              type="text" 
+              id="task-location-input" 
+              class="form-input" 
+              placeholder="Ej: Palermo Soho, Belgrano, etc." 
+              value="Palermo Soho, CABA"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="task-budget-input">Presupuesto estimado que podés pagar</label>
+            <input 
+              type="text" 
+              id="task-budget-input" 
+              class="form-input" 
+              placeholder="Ej: $20.000 - $30.000 o A convenir" 
+              value="$25.000 - $35.000"
+            >
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+          <button type="button" class="btn-secondary" data-close-modal>Cancelar</button>
+          <button type="submit" class="btn-primary">
+            <span>🚀</span> Publicar Pedido en OTRO
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL 2: DETALLE DE TAREA Y PRESUPUESTOS RECIBIDOS
+       ======================================================== -->
+  <div id="task-detail-modal" class="modal-overlay">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <span style="font-size: 1.3rem;">📋</span>
+          <h3 id="detail-modal-title">Detalle de la Tarea</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal title="Cerrar">✕</button>
+      </div>
+
+      <div id="detail-modal-body" class="modal-body">
+        <!-- Rendered dynamically by App.openTaskDetailModal -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL 3: POSTULARSE A UNA TAREA (MODO PRESTADOR)
+       ======================================================== -->
+  <div id="submit-bid-modal" class="modal-overlay">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <span style="font-size: 1.3rem;">⚡</span>
+          <div>
+            <h3 style="font-size: 1.05rem;">Postularme a esta tarea</h3>
+            <p id="bid-target-task-title" style="font-size: 0.78rem; color: var(--text-muted);"></p>
+          </div>
+        </div>
+        <button class="modal-close-btn" data-close-modal title="Cerrar">✕</button>
+      </div>
+
+      <form id="submit-bid-form" class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="bid-amount-input">Tu valor presupuestado ($)</label>
+          <input 
+            type="text" 
+            id="bid-amount-input" 
+            class="form-input" 
+            placeholder="Ej: 32000" 
+            required
+          >
+          <span style="font-size: 0.72rem; color: var(--text-subtle);">Monto total estimado por la mano de obra del trabajo</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="bid-message-input">Mensaje para el solicitante</label>
+          <textarea 
+            id="bid-message-input" 
+            class="form-textarea" 
+            placeholder="Contale cuándo podés pasar, qué herramientas llevás y si ofrecés garantía..." 
+            required
+          ></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+          <button type="button" class="btn-secondary" data-close-modal>Cancelar</button>
+          <button type="submit" class="btn-primary">
+            <span>📨</span> Enviar Propuesta al Cliente
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL 4: CHAT INTERACTIVO CON EL PRESTADOR / WHATSAPP
+       ======================================================== -->
+  <div id="chat-modal" class="modal-overlay">
+    <div class="modal-window chat-window">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <div id="chat-pro-avatar" class="pro-avatar" style="width: 38px; height: 38px; font-size: 0.95rem;">
+            MB
+          </div>
+          <div>
+            <h3 id="chat-pro-name" style="font-size: 1.05rem; line-height: 1.2;">Matías Benítez</h3>
+            <div id="chat-pro-title" style="font-size: 0.75rem; color: var(--accent-cyan);">Plomero Matriculado</div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button id="chat-whatsapp-btn" class="btn-contact-wa" style="padding: 4px 10px; font-size: 0.75rem;" title="Abrir chat directo en WhatsApp">
+            <span>💬</span> WhatsApp
+          </button>
+          <button id="chat-close-btn" class="modal-close-btn" title="Cerrar chat">✕</button>
+        </div>
+      </div>
+
+      <div id="chat-messages-body" class="chat-messages-container">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <form id="chat-form" class="chat-footer">
+        <input 
+          type="text" 
+          id="chat-message-input" 
+          class="chat-input" 
+          placeholder="Escribí un mensaje..." 
+          autocomplete="off"
+        >
+        <button type="submit" class="chat-send-btn" title="Enviar mensaje">
+          ➤
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       PWA INSTALL PROMPT BANNER
+       ======================================================== -->
+  <div id="pwa-install-banner" class="pwa-banner">
+    <div class="pwa-banner-info">
+      <img src="./assets/logo.jpg" alt="Icono OTRO" class="pwa-banner-icon">
+      <div class="pwa-banner-text">
+        <h4>Instalar OTRO en tu dispositivo</h4>
+        <p>Accedé en un toque a los mejores servicios para el hogar</p>
+      </div>
+    </div>
+    <div class="pwa-banner-actions">
+      <button id="pwa-install-action-btn" class="btn-primary" style="padding: 6px 12px; font-size: 0.78rem;">
+        Instalar
+      </button>
+      <button id="pwa-install-close-btn" class="modal-close-btn" style="font-size: 1rem;">✕</button>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MOBILE BOTTOM NAVIGATION BAR
+       ======================================================== -->
+  <nav class="mobile-bottom-bar">
+    <button class="nav-bottom-item active" data-tab="feed">
+      <span class="icon">📋</span>
+      <span>Pedidos</span>
+    </button>
+    <button class="nav-bottom-item" data-tab="pros">
+      <span class="icon">👥</span>
+      <span>Otros (Pros)</span>
+    </button>
+    <button class="nav-bottom-item" data-open-publish style="color: var(--accent-cyan); font-weight: 700;">
+      <span class="icon" style="font-size: 1.5rem; line-height: 1;">➕</span>
+      <span>Publicar</span>
+    </button>
+    <button class="nav-bottom-item" data-tab="my-tasks">
+      <span class="icon">📌</span>
+      <span>Mis Pedidos</span>
+    </button>
+    <button class="nav-bottom-item" onclick="Storage.setRole(Storage.getRole() === 'client' ? 'provider' : 'client')">
+      <span class="icon">🔄</span>
+      <span>Rol</span>
+    </button>
+  </nav>
+
+  <!-- Application Scripts -->
+  <script src="./js/data.js"></script>
+  <script src="./js/storage.js"></script>
+  <script src="./js/chat.js"></script>
+  <script src="./js/pwa.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>

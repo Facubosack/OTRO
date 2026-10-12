@@ -1,0 +1,19 @@
+{
+  "name": "OTRO - Servicios para tu Hogar",
+  "short_name": "OTRO",
+  "description": "¿Necesitás un servicio en tu hogar? Buscá a otro que lo haga por vos",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0B0F19",
+  "theme_color": "#00D2FF",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "assets/logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "lifestyle", "business"]
+}

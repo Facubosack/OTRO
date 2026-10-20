@@ -26,14 +26,15 @@ const PWA = {
     const installBanner = document.getElementById('pwa-install-banner');
     const installBtn = document.getElementById('pwa-install-action-btn');
     const closeBtn = document.getElementById('pwa-install-close-btn');
+    const isDismissed = localStorage.getItem('pwa_banner_dismissed') === 'true';
 
     window.addEventListener('beforeinstallprompt', (e) => {
       // Prevent automatic browser mini-infobar
       e.preventDefault();
       deferredInstallPrompt = e;
 
-      // Show custom install banner
-      if (installBanner) {
+      // Show custom install banner only if not dismissed
+      if (installBanner && !isDismissed) {
         installBanner.classList.add('visible');
       }
     });
@@ -48,6 +49,7 @@ const PWA = {
         if (installBanner) {
           installBanner.classList.remove('visible');
         }
+        localStorage.setItem('pwa_banner_dismissed', 'true');
       });
     }
 
@@ -56,6 +58,7 @@ const PWA = {
         if (installBanner) {
           installBanner.classList.remove('visible');
         }
+        localStorage.setItem('pwa_banner_dismissed', 'true');
       });
     }
 

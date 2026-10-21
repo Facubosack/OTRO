@@ -52,7 +52,9 @@ const ChatEngine = {
     setTimeout(() => {
       this.scrollToBottom();
       const input = document.getElementById('chat-message-input');
-      if (input) input.focus();
+      if (input && window.innerWidth > 768) {
+        input.focus();
+      }
     }, 150);
   },
 

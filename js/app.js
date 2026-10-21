@@ -56,7 +56,9 @@ const App = {
         this.searchQuery = '';
         searchClear.classList.remove('visible');
         this.renderCurrentTab();
-        searchInput.focus();
+        if (window.innerWidth > 768) {
+          searchInput.focus();
+        }
       });
     }
 
@@ -638,7 +640,9 @@ const App = {
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
     const firstInput = document.getElementById('task-title-input');
-    if (firstInput) firstInput.focus();
+    if (firstInput && window.innerWidth > 768) {
+      firstInput.focus();
+    }
   },
 
   handleNewTaskSubmit(e) {
@@ -693,7 +697,9 @@ const App = {
       modal.classList.add('active');
       document.body.style.overflow = 'hidden';
       const input = document.getElementById('bid-amount-input');
-      if (input) input.focus();
+      if (input && window.innerWidth > 768) {
+        input.focus();
+      }
     }
   },
 

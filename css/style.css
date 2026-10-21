@@ -54,11 +54,21 @@
   padding: 0;
 }
 
+html {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background-color: var(--bg-page);
   color: var(--text-main);
   min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
   line-height: 1.55;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
@@ -445,7 +455,7 @@ a {
   background: none;
   border: none;
   color: var(--text-main);
-  font-size: 0.95rem;
+  font-size: 16px;
   outline: none;
 }
 
@@ -1088,7 +1098,7 @@ a {
   border-radius: var(--radius-md);
   padding: 10px 14px;
   color: var(--text-main);
-  font-size: 0.92rem;
+  font-size: 16px;
   outline: none;
   transition: border-color var(--transition);
 }
@@ -1236,7 +1246,7 @@ a {
   border-radius: var(--radius-full);
   padding: 9px 16px;
   color: var(--text-main);
-  font-size: 0.9rem;
+  font-size: 16px;
   outline: none;
 }
 
@@ -1755,5 +1765,12 @@ a {
   .form-row-2 {
     grid-template-columns: 1fr;
     gap: 10px;
+  }
+
+  /* Evitar auto-zoom forzado por navegadores móviles */
+  input, select, textarea,
+  .form-input, .form-select, .form-textarea,
+  .search-input, .chat-input {
+    font-size: 16px !important;
   }
 }

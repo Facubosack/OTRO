@@ -1,8 +1,8 @@
-const CACHE_NAME = 'otro-pwa-v3';
+const CACHE_NAME = 'otro-pwa-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './css/style.css?v=2.1',
+  './css/style.css?v=2.2',
   './js/data.js',
   './js/storage.js',
   './js/app.js',

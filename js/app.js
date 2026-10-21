@@ -140,6 +140,13 @@ const App = {
         }
       }
     });
+
+    // Listen to Firebase cloud errors (such as missing permissions)
+    window.addEventListener('cloudError', (e) => {
+      if (e.detail && e.detail.message) {
+        this.showToast(e.detail.message, '⚠️');
+      }
+    });
   },
 
   renderAll() {
@@ -329,6 +336,9 @@ const App = {
         <div class="task-card" data-task-id="${task.id}">
           <div class="task-card-header">
             <span class="task-category-badge">${catObj.icon} ${catObj.name}</span>
+            ${task.clientName === 'Facundo M.' ? `
+              <span class="task-category-badge" style="background: var(--bg-warm); color: var(--brand-primary); font-weight: 700; border-color: var(--bg-warm-border);">👤 Tu pedido</span>
+            ` : ''}
             <span class="urgency-badge ${urgencyClass}">⏱️ ${task.urgency}</span>
           </div>
 
@@ -693,8 +703,19 @@ const App = {
     // Reset and close
     e.target.reset();
     this.closeModal(document.getElementById('publish-task-modal'));
-    this.showToast('¡Tu pedido fue publicado! Los prestadores de tu zona te enviarán presupuestos.', '🚀');
-    this.switchTab('my-tasks');
+
+    // Clear filters so the new task is 100% visible at the top of the feed
+    this.activeCategory = 'all';
+    this.searchQuery = '';
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) searchInput.value = '';
+    const searchClear = document.getElementById('search-clear');
+    if (searchClear) searchClear.classList.remove('visible');
+
+    this.renderCategoriesNav();
+    this.switchTab('feed');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.showToast('¡Tu pedido fue publicado y ya aparece primero en el muro!', '🚀');
   },
 
   /* -------------------------------------------------------------

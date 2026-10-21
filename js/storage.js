@@ -93,6 +93,11 @@ const Storage = {
           console.warn("⚠️ Firestore: Error en listener en tiempo real. Usando caché local:", error);
           this.isCloudConnected = false;
           window.dispatchEvent(new CustomEvent('cloudSyncState', { detail: { connected: false, error: error.message } }));
+          if (error && error.code === 'permission-denied') {
+            window.dispatchEvent(new CustomEvent('cloudError', {
+              detail: { message: '⚠️ Firestore bloqueó la lectura: activá las Reglas en modo prueba en console.firebase.google.com' }
+            }));
+          }
         });
       } catch (err) {
         console.warn("No se pudo iniciar listener de Firestore:", err);
@@ -187,6 +192,11 @@ const Storage = {
         console.log("☁️ Tarea sincronizada en Firestore:", taskId);
       }).catch((err) => {
         console.error("Error al guardar en Firestore:", err);
+        if (err && err.code === 'permission-denied') {
+          window.dispatchEvent(new CustomEvent('cloudError', {
+            detail: { message: '⚠️ Firestore rechazó guardar el pedido: activá las Reglas en modo prueba en console.firebase.google.com' }
+          }));
+        }
       });
     }
 

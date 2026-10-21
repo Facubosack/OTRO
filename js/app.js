@@ -124,6 +124,22 @@ const App = {
         this.refreshTaskDetailModal(this.currentViewingTaskId);
       }
     });
+
+    // Listen to real-time cloud sync status
+    window.addEventListener('cloudSyncState', (e) => {
+      const badge = document.getElementById('cloud-sync-badge');
+      if (badge) {
+        if (e.detail && e.detail.connected) {
+          badge.textContent = '🟢 EN VIVO';
+          badge.classList.remove('offline');
+          badge.title = 'Conectado a Firebase Firestore en tiempo real';
+        } else {
+          badge.textContent = '🟡 OFFLINE';
+          badge.classList.add('offline');
+          badge.title = 'Modo local sin conexión';
+        }
+      }
+    });
   },
 
   renderAll() {

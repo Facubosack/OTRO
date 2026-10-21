@@ -164,6 +164,23 @@ a {
   letter-spacing: 0.02em;
 }
 
+.brand-title span.badge-pill.sync-pill {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  border-color: #86EFAC;
+  font-size: 0.62rem;
+  letter-spacing: 0.03em;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.brand-title span.badge-pill.sync-pill.offline {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+  border-color: #FDE68A;
+}
+
 .brand-motto {
   font-size: 0.78rem;
   color: var(--text-muted);

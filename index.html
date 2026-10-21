@@ -45,6 +45,7 @@
             <h1 class="brand-title">
               OTRO<span class="logo-accent">.</span>
               <span class="badge-pill">EN EL BARRIO</span>
+              <span id="cloud-sync-badge" class="badge-pill sync-pill" title="Sincronización en tiempo real con Firebase">🟢 EN VIVO</span>
             </h1>
             <span class="brand-motto">¿Necesitás un servicio en tu hogar? Buscá a otro que lo haga por vos</span>
           </div>
@@ -463,6 +464,11 @@
       <span>Rol</span>
     </button>
   </nav>
+
+  <!-- Firebase SDK (v10 compat for browser scripts) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="./js/firebase-config.js"></script>
 
   <!-- Application Scripts -->
   <script src="./js/data.js"></script>

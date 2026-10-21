@@ -62,16 +62,17 @@ pie title Estado de Funcionalidades
 A continuación se detallan las etapas pendientes para convertir el prototipo en una plataforma real en la calle:
 
 ### 🚀 Fase 1: Publicación en Internet (Deploy Público)
-- [ ] Subir la app a un hosting gratuito con SSL:
-  - **Opción recomendada:** Conectar el repositorio de GitHub con **Vercel** o **GitHub Pages**.
-  - Permite tener una URL pública (ej: `https://otro-app.vercel.app`) para probarla directamente desde el celular y compartirla.
+- [x] Subir la app a un hosting gratuito con SSL:
+  - Repositorio conectado con **Vercel** ([https://github.com/Facubosack/OTRO](https://github.com/Facubosack/OTRO)).
+  - URL pública con HTTPS y despliegue automático por cada push a `main`.
 
 ### ☁️ Fase 2: Base de Datos en la Nube (Multi-usuario real)
-- [ ] Reemplazar `localStorage` por una base de datos en tiempo real:
-  - **Opciones recomendadas:** **Supabase** (PostgreSQL) o **Firebase Firestore**.
-  - Colección `tasks` (pedidos abiertos y postulaciones sincronizadas al instante entre todos los teléfonos).
-  - Colección `pros` (directorio de especialistas administrable).
-  - Colección `bids` (presupuestos enviados en tiempo real).
+- [x] Conexión en tiempo real con **Firebase Firestore**:
+  - Configurado proyecto Firebase (`otro-fbf44`).
+  - Colección `tasks` sincronizada en vivo entre todos los dispositivos con listeners `onSnapshot`.
+  - Sistema de presupuestos y postulaciones en tiempo real (`bids`).
+  - Persistencia offline en IndexedDB integrada con PWA y fallback a `localStorage`.
+  - Indicador visual `🟢 EN VIVO` en la cabecera.
 
 ### 🔐 Fase 3: Registro y Autenticación de Usuarios
 - [ ] Pantalla de registro e inicio de sesión:

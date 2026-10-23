@@ -9,6 +9,8 @@ const firebaseConfig = {
 };
 
 let db = null;
+let auth = null;
+let googleProvider = null;
 let isFirebaseReady = false;
 
 try {
@@ -17,6 +19,8 @@ try {
       firebase.initializeApp(firebaseConfig);
     }
     db = firebase.firestore();
+    auth = firebase.auth();
+    googleProvider = new firebase.auth.GoogleAuthProvider();
 
     // Enable offline persistence in IndexedDB for PWA support
     db.enablePersistence({ synchronizeTabs: true }).catch((err) => {

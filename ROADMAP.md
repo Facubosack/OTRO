@@ -75,10 +75,13 @@ A continuación se detallan las etapas pendientes para convertir el prototipo en
   - Indicador visual `🟢 EN VIVO` en la cabecera.
 
 ### 🔐 Fase 3: Registro y Autenticación de Usuarios
-- [ ] Pantalla de registro e inicio de sesión:
-  - Login con Google (1 clic) o número de teléfono vía SMS / WhatsApp OTP.
-  - Perfil configurable: Nombre, foto de perfil, barrio/zona de cobertura y número de teléfono de contacto.
-  - Flujo de registro para prestadores: selección de oficios, tarifas y verificación de identidad.
+- [x] Autenticación y gestión de usuarios multi-perfil:
+  - Login directo con Google (1 clic) vía Firebase Authentication (`signInWithPopup`).
+  - Sincronización automática de perfil con colección `users/{uid}` en Firestore.
+  - Modal "Mi Perfil": edición de nombre, WhatsApp/teléfono, barrio/localidad y rol (Cliente vs Prestador).
+  - Prestadores ("Soy un Otro"): selección de oficios con checkboxes, tarifas orientativas y presentación/bio.
+  - Navegación abierta sin barreras para explorar, con prompt de inicio de sesión al publicar pedidos o enviar presupuestos.
+  - "Mis Pedidos" vinculado al usuario autenticado en tiempo real.
 
 ### 🔔 Fase 4: Notificaciones y Geolocalización
 - [ ] **Notificaciones Push (Web Push):**

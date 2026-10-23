@@ -8,49 +8,86 @@ const STORAGE_KEYS = {
 };
 
 const Storage = {
-  _tasksCache: null,
+  _tasksCache: [],
+  _prosCache: [],
   _unsubscribeTasks: null,
+  _unsubscribePros: null,
   isCloudConnected: false,
 
   init() {
-    // 1. Initial Local Storage defaults
-    if (!localStorage.getItem(STORAGE_KEYS.TASKS)) {
-      localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(INITIAL_DATA.initialTasks));
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.PROS)) {
-      localStorage.setItem(STORAGE_KEYS.PROS, JSON.stringify(INITIAL_DATA.pros));
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.ROLE)) {
-      localStorage.setItem(STORAGE_KEYS.ROLE, 'client'); // 'client' or 'provider'
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.USER)) {
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify({
-        name: 'Facundo M.',
-        zone: 'Palermo, CABA',
-        avatarColor: '#EA580C',
-        avatarInitials: 'FM',
-        phone: '5491100000000'
-      }));
-    }
-    if (!localStorage.getItem(STORAGE_KEYS.CHATS)) {
-      localStorage.setItem(STORAGE_KEYS.CHATS, JSON.stringify({
-        'pro-1': [
-          { sender: 'pro', text: '¡Hola Facundo! Vi tu pedido por la pérdida en el vanitory. ¿A qué hora te quedaría más cómodo que pase?', time: '14:20' },
-          { sender: 'user', text: 'Hola Matías, si podés venir alrededor de las 16:30 hs sería genial.', time: '14:22' },
-          { sender: 'pro', text: '¡Perfecto! Ya salgo para allá con los repuestos.', time: '14:25' }
-        ]
-      }));
+    // One-time purge of old mock data from previous prototype
+    if (localStorage.getItem('otro_cleaned_mock_v2') !== 'true') {
+      localStorage.removeItem(STORAGE_KEYS.TASKS);
+      localStorage.removeItem(STORAGE_KEYS.PROS);
+      localStorage.removeItem(STORAGE_KEYS.CHATS);
+      const savedUser = localStorage.getItem(STORAGE_KEYS.USER);
+      if (savedUser && savedUser.includes('Facundo M.')) {
+        localStorage.removeItem(STORAGE_KEYS.USER);
+      }
+      localStorage.setItem('otro_cleaned_mock_v2', 'true');
     }
 
-    // Populate memory cache from localStorage first
+    // Default Local Storage structures for real data
+    if (!localStorage.getItem(STORAGE_KEYS.TASKS)) {
+      localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify([]));
+    }
+    if (!localStorage.getItem(STORAGE_KEYS.PROS)) {
+      localStorage.setItem(STORAGE_KEYS.PROS, JSON.stringify([]));
+    }
+    if (!localStorage.getItem(STORAGE_KEYS.ROLE)) {
+      localStorage.setItem(STORAGE_KEYS.ROLE, 'client');
+    }
+    if (!localStorage.getItem(STORAGE_KEYS.CHATS)) {
+      localStorage.setItem(STORAGE_KEYS.CHATS, JSON.stringify({}));
+    }
+
+    // Populate memory cache from localStorage
     try {
       this._tasksCache = JSON.parse(localStorage.getItem(STORAGE_KEYS.TASKS)) || [];
     } catch (e) {
-      this._tasksCache = INITIAL_DATA.initialTasks;
+      this._tasksCache = [];
     }
 
-    // 2. Connect to Firebase Firestore in real-time
+    try {
+      this._prosCache = JSON.parse(localStorage.getItem(STORAGE_KEYS.PROS)) || [];
+    } catch (e) {
+      this._prosCache = [];
+    }
+
+    // Connect to Firebase Firestore in real-time
     this.initFirestoreSync();
+    this.initProsSync();
+  },
+
+  async cleanFirestoreMockTasks() {
+    if (!db) return;
+    try {
+      const snapshot = await db.collection('tasks').get();
+      if (snapshot.empty) return;
+
+      const batch = db.batch();
+      let deleteCount = 0;
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        // Identify mock tasks (task-101 to task-106 or unassigned demo client)
+        if (
+          doc.id.startsWith('task-10') ||
+          data.clientName === 'Facundo M.' ||
+          !data.authorId ||
+          data.authorId === 'demo-user'
+        ) {
+          batch.delete(doc.ref);
+          deleteCount++;
+        }
+      });
+
+      if (deleteCount > 0) {
+        await batch.commit();
+        console.log(`🧹 Eliminadas ${deleteCount} tareas de prueba iniciales de Firestore.`);
+      }
+    } catch (err) {
+      console.warn("Error al limpiar tareas mock de Firestore:", err);
+    }
   },
 
   initFirestoreSync() {
@@ -58,19 +95,27 @@ const Storage = {
       try {
         console.log("📡 Conectando listener en tiempo real de Firestore (colección: tasks)...");
         
+        // Clean any lingering mock tasks on connection
+        this.cleanFirestoreMockTasks();
+
         this._unsubscribeTasks = db.collection('tasks').onSnapshot((snapshot) => {
           this.isCloudConnected = true;
           window.dispatchEvent(new CustomEvent('cloudSyncState', { detail: { connected: true } }));
 
           if (snapshot.empty) {
-            console.log("ℹ️ Firestore: Colección 'tasks' vacía. Sembrando datos iniciales en la nube...");
-            this.seedFirestoreInitialData();
+            this._tasksCache = [];
+            localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify([]));
+            window.dispatchEvent(new CustomEvent('tasksUpdated'));
             return;
           }
 
           const remoteTasks = [];
           snapshot.forEach(doc => {
             const data = doc.data();
+            // Discard any residual mock tasks
+            if (doc.id.startsWith('task-10') || data.clientName === 'Facundo M.' || !data.authorId) {
+              return;
+            }
             remoteTasks.push({
               id: doc.id,
               ...data
@@ -87,7 +132,7 @@ const Storage = {
           this._tasksCache = remoteTasks;
           localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(remoteTasks));
 
-          console.log(`✅ Firestore sincronizado: ${remoteTasks.length} tareas cargadas en vivo.`);
+          console.log(`✅ Firestore sincronizado: ${remoteTasks.length} pedidos reales cargados.`);
           window.dispatchEvent(new CustomEvent('tasksUpdated'));
         }, (error) => {
           console.warn("⚠️ Firestore: Error en listener en tiempo real. Usando caché local:", error);
@@ -110,26 +155,63 @@ const Storage = {
     }
   },
 
-  async seedFirestoreInitialData() {
-    if (!db) return;
-    try {
-      const batch = db.batch();
-      const initial = INITIAL_DATA.initialTasks;
-      let now = Date.now();
+  initProsSync() {
+    if (typeof isFirebaseReady !== 'undefined' && isFirebaseReady && db) {
+      try {
+        console.log("📡 Conectando listener de prestadores reales en Firestore (users role=provider)...");
+        this._unsubscribePros = db.collection('users').where('role', '==', 'provider').onSnapshot((snapshot) => {
+          const realPros = [];
+          const tradeLabels = {
+            plomeria: 'Plomería & Gas',
+            electricidad: 'Electricidad',
+            pintura: 'Pintura',
+            muebles: 'Armado de Muebles',
+            limpieza: 'Limpieza Profunda',
+            fletes: 'Fletes & Mudanzas',
+            cerrajeria: 'Cerrajería 24hs',
+            jardineria: 'Jardinería',
+            climatizacion: 'Aire & Calefacción',
+            albanileria: 'Albañilería'
+          };
 
-      initial.forEach((task, index) => {
-        const docRef = db.collection('tasks').doc(task.id);
-        const taskWithTime = {
-          ...task,
-          createdAtTimestamp: now - (index * 600000) // staggered by 10 mins
-        };
-        batch.set(docRef, taskWithTime);
-      });
+          snapshot.forEach(doc => {
+            const u = doc.data();
+            const trades = u.trades || [];
+            const primaryCategory = trades[0] || 'reparaciones';
+            const name = u.name || 'Prestador';
+            const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
 
-      await batch.commit();
-      console.log("🌱 Datos iniciales cargados en Firestore exitosamente.");
-    } catch (err) {
-      console.error("Error al sembrar datos en Firestore:", err);
+            realPros.push({
+              id: doc.id,
+              name,
+              title: u.bio ? (u.bio.length > 55 ? u.bio.substring(0, 55) + '...' : u.bio) : 'Prestador de Oficio Verificado',
+              category: primaryCategory,
+              badge: 'Vecino Verificado',
+              rating: 5.0,
+              reviewsCount: 0,
+              jobsCompleted: 0,
+              hourlyRate: u.hourlyRate || 'A convenir',
+              zone: u.zone || 'CABA',
+              phone: u.phone ? u.phone.replace(/[^0-9]/g, '') : '',
+              avatarColor: '#EA580C',
+              avatarPhoto: u.photoURL || '',
+              avatarInitials: initials,
+              bio: u.bio || 'Especialista en servicios del hogar.',
+              skills: trades.map(t => tradeLabels[t] || t),
+              whatsappText: `Hola ${name}, te contacto desde la app OTRO para consultar por un trabajo en mi hogar.`
+            });
+          });
+
+          this._prosCache = realPros;
+          localStorage.setItem(STORAGE_KEYS.PROS, JSON.stringify(realPros));
+          console.log(`✅ Prestadores sincronizados: ${realPros.length} profesionales registrados.`);
+          window.dispatchEvent(new CustomEvent('prosUpdated'));
+        }, (err) => {
+          console.warn("No se pudieron cargar prestadores desde Firestore:", err);
+        });
+      } catch (err) {
+        console.warn("Error al inicializar prestadores:", err);
+      }
     }
   },
 
@@ -145,22 +227,15 @@ const Storage = {
 
   getUser() {
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEYS.USER)) || {};
+      return JSON.parse(localStorage.getItem(STORAGE_KEYS.USER)) || { name: 'Vecino', zone: 'CABA' };
     } catch (e) {
-      return {};
+      return { name: 'Vecino', zone: 'CABA' };
     }
   },
 
   // Tasks Management
   getTasks() {
-    if (this._tasksCache && this._tasksCache.length > 0) {
-      return this._tasksCache;
-    }
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEYS.TASKS)) || [];
-    } catch (e) {
-      return [];
-    }
+    return this._tasksCache || [];
   },
 
   getTaskById(id) {
@@ -314,11 +389,7 @@ const Storage = {
 
   // Pros Management
   getPros() {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEYS.PROS)) || [];
-    } catch (e) {
-      return [];
-    }
+    return this._prosCache || [];
   },
 
   getProById(id) {
@@ -349,25 +420,6 @@ const Storage = {
     localStorage.setItem(STORAGE_KEYS.CHATS, JSON.stringify(chats));
     window.dispatchEvent(new CustomEvent('chatUpdated', { detail: { proId } }));
     return chats[proId];
-  },
-
-  async resetDemo() {
-    if (confirm("¿Querés restaurar los datos de prueba? Esto reiniciará las tareas.")) {
-      if (typeof isFirebaseReady !== 'undefined' && isFirebaseReady && db) {
-        try {
-          const snapshot = await db.collection('tasks').get();
-          const batch = db.batch();
-          snapshot.forEach(doc => batch.delete(doc.ref));
-          await batch.commit();
-          await this.seedFirestoreInitialData();
-        } catch (err) {
-          console.error("Error al reiniciar en Firestore:", err);
-        }
-      }
-      localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(INITIAL_DATA.initialTasks));
-      localStorage.setItem(STORAGE_KEYS.PROS, JSON.stringify(INITIAL_DATA.pros));
-      window.location.reload();
-    }
   }
 };
 

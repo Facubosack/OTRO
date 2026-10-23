@@ -153,6 +153,13 @@ const App = {
       this.renderCurrentTab();
       this.updateCounts();
     });
+
+    // Listen to real pros updates from Firestore
+    window.addEventListener('prosUpdated', () => {
+      if (this.activeTab === 'pros') {
+        this.renderProsDirectory();
+      }
+    });
   },
 
   renderAll() {
@@ -318,13 +325,14 @@ const App = {
     }
 
     if (tasks.length === 0) {
+      const isFiltered = this.activeCategory !== 'all' || this.searchQuery;
       container.innerHTML = `
-        <div class="empty-state-card">
-          <div class="empty-state-icon">🔍</div>
-          <h3>No se encontraron pedidos con este filtro</h3>
-          <p>Probá cambiando de rubro o limpiando la búsqueda.</p>
-          <button class="btn-primary" data-open-publish style="margin-top: 8px;">
-            <span>➕</span> Publicar nueva necesidad
+        <div class="empty-state-card" style="padding: 44px 20px;">
+          <div class="empty-state-icon">${isFiltered ? '🔍' : '🏡'}</div>
+          <h3 style="font-size: 1.15rem;">${isFiltered ? 'No se encontraron pedidos con este filtro' : 'Aún no hay pedidos publicados en el muro'}</h3>
+          <p style="max-width: 440px; font-size: 0.88rem;">${isFiltered ? 'Probá seleccionando "Todos los Rubros" o limpiando el buscador.' : '¿Necesitás una reparación, pintura o ayuda en tu casa? Publicá el primer pedido y recibí presupuestos en minutos.'}</p>
+          <button class="btn-primary" data-open-publish style="margin-top: 10px;">
+            <span>➕</span> Publicar el primer pedido
           </button>
         </div>
       `;
@@ -342,7 +350,7 @@ const App = {
         <div class="task-card" data-task-id="${task.id}">
           <div class="task-card-header">
             <span class="task-category-badge">${catObj.icon} ${catObj.name}</span>
-            ${task.clientName === 'Facundo M.' ? `
+            ${(typeof Auth !== 'undefined' && Auth.currentUser && (task.authorId === Auth.currentUser.uid || task.clientName === Auth.currentUser.name)) ? `
               <span class="task-category-badge" style="background: var(--bg-warm); color: var(--brand-primary); font-weight: 700; border-color: var(--bg-warm-border);">👤 Tu pedido</span>
             ` : ''}
             <span class="urgency-badge ${urgencyClass}">⏱️ ${task.urgency}</span>
@@ -411,11 +419,15 @@ const App = {
     }
 
     if (pros.length === 0) {
+      const isFiltered = this.activeCategory !== 'all' || this.searchQuery;
       container.innerHTML = `
-        <div class="empty-state-card">
+        <div class="empty-state-card" style="padding: 44px 20px;">
           <div class="empty-state-icon">👥</div>
-          <h3>No encontramos especialistas para este filtro</h3>
-          <p>Probá seleccionando "Todos los Rubros" o una zona más amplia.</p>
+          <h3 style="font-size: 1.15rem;">${isFiltered ? 'No encontramos especialistas para este filtro' : 'Aún no hay prestadores registrados'}</h3>
+          <p style="max-width: 440px; font-size: 0.88rem;">¿Hacés trabajos de oficio o reparaciones en tu zona? Podés sumarte como prestador desde tu Perfil ("Soy un Otro").</p>
+          <button class="btn-primary" onclick="Auth.openProfileModal()" style="margin-top: 10px;">
+            <span>🧰</span> Configurar mi Perfil de Prestador
+          </button>
         </div>
       `;
       return;
@@ -428,7 +440,7 @@ const App = {
         <div class="pro-card" data-pro-id="${pro.id}">
           <div class="pro-header-row">
             <div class="pro-avatar" style="background: ${pro.avatarColor}">
-              ${pro.avatarInitials}
+              ${pro.avatarPhoto ? `<img src="${pro.avatarPhoto}" alt="${this.escapeHTML(pro.name)}">` : pro.avatarInitials}
             </div>
             <div class="pro-info">
               <div class="pro-name-row">

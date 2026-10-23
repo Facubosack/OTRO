@@ -901,6 +901,13 @@ a {
   font-weight: 800;
   color: #FFF;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.pro-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .pro-info {

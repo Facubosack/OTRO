@@ -100,7 +100,7 @@ A continuación se detallan las etapas pendientes para convertir el prototipo en
 
 1. **Abrir la carpeta del proyecto en la terminal:**
    ```bash
-   cd C:\Users\facun\.gemini\antigravity-ide\scratch\otro
+   cd c:\Users\facun\OneDrive\Desktop\APLICACIONES\OTRO\OTRO
    ```
 
 2. **Iniciar el servidor local para probar cambios:**

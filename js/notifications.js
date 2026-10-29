@@ -199,8 +199,23 @@ const Notifications = {
     const container = document.getElementById('notif-dropdown-list');
     if (!container) return;
 
+    let permissionBanner = '';
+    if ('Notification' in window && Notification.permission !== 'granted') {
+      permissionBanner = `
+        <div class="notif-permission-banner" onclick="Notifications.requestWebPushPermission()">
+          <span style="font-size: 1.3rem;">📲</span>
+          <div style="flex: 1; text-align: left;">
+            <strong style="display: block; font-size: 0.78rem; color: var(--brand-dark);">Activar avisos en tu pantalla</strong>
+            <span style="display: block; font-size: 0.70rem; color: var(--text-muted); line-height: 1.2;">Para que te lleguen avisos de presupuestos como mensajes</span>
+          </div>
+          <button class="btn-primary" style="padding: 4px 10px; font-size: 0.72rem; border-radius: 6px; pointer-events: none;">Activar</button>
+        </div>
+      `;
+    }
+
     if (this.list.length === 0) {
       container.innerHTML = `
+        ${permissionBanner}
         <div class="notif-empty-state">
           <span style="font-size: 1.8rem;">🔔</span>
           <p>No tenés notificaciones nuevas.</p>
@@ -209,7 +224,7 @@ const Notifications = {
       return;
     }
 
-    container.innerHTML = this.list.slice(0, 15).map(item => {
+    container.innerHTML = permissionBanner + this.list.slice(0, 15).map(item => {
       const timeStr = this.formatTimeAgo(item.createdAt);
       let icon = '🔔';
       if (item.type === 'bid_received') icon = '📨';
@@ -247,16 +262,36 @@ const Notifications = {
     // 1. In-app toast
     App.showToast(notif.message || notif.title, '🔔');
 
-    // 2. Web Push Notification
+    // 2. Web Push / System Notification (como un mensaje de WhatsApp / notificación nativa)
     if ('Notification' in window && Notification.permission === 'granted') {
-      try {
-        new Notification(notif.title || 'OTRO', {
-          body: notif.message,
-          icon: './assets/logo.svg',
-          badge: './assets/logo.svg'
+      const title = notif.title || 'OTRO';
+      const options = {
+        body: notif.message || '',
+        icon: './assets/logo.svg',
+        badge: './assets/logo.svg',
+        vibrate: [200, 100, 200],
+        tag: notif.id || 'otro-notif',
+        renotify: true,
+        data: {
+          taskId: notif.taskId || null
+        }
+      };
+
+      // En Android y PWA es obligatorio usar el Service Worker
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then((reg) => {
+          reg.showNotification(title, options).catch((err) => {
+            console.warn("Error mostrando notificación con Service Worker:", err);
+          });
+        }).catch(() => {
+          try { new Notification(title, options); } catch(e) {}
         });
-      } catch (err) {
-        console.warn("No se pudo disparar notificación de sistema:", err);
+      } else {
+        try {
+          new Notification(title, options);
+        } catch (err) {
+          console.warn("No se pudo disparar notificación de sistema:", err);
+        }
       }
     }
   },

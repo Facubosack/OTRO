@@ -438,6 +438,21 @@ a {
   flex-direction: column;
 }
 
+.notif-permission-banner {
+  background: #EEF4FF;
+  border-bottom: 1.5px solid var(--border-medium);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.notif-permission-banner:hover {
+  background: #E0ECFF;
+}
+
 .notif-item {
   padding: 10px 14px;
   border-bottom: 1px solid var(--border-light);

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'otro-pwa-v10';
+const CACHE_NAME = 'otro-pwa-v11';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -56,5 +56,45 @@ self.addEventListener('fetch', (event) => {
       .catch(() => {
         return caches.match(event.request);
       })
+  );
+});
+
+/* -------------------------------------------------------------
+   WEB PUSH & NOTIFICATION CLICKS (Service Worker)
+   ------------------------------------------------------------- */
+self.addEventListener('push', (event) => {
+  let data = { title: 'OTRO', body: 'Tenés una nueva novedad en tu zona.' };
+  try {
+    if (event.data) {
+      data = event.data.json();
+    }
+  } catch (e) {
+    if (event.data) data.body = event.data.text();
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'OTRO', {
+      body: data.body || '',
+      icon: './assets/logo.svg',
+      badge: './assets/logo.svg',
+      vibrate: [200, 100, 200],
+      data: data
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (self.clients.openWindow) {
+        return self.clients.openWindow('./');
+      }
+    })
   );
 });

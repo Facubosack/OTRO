@@ -21,7 +21,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet -->
-  <link rel="stylesheet" href="./css/style.css?v=2.5">
+  <link rel="stylesheet" href="./css/style.css?v=2.6">
 </head>
 <body>
 
@@ -312,6 +312,7 @@
               id="task-location-input" 
               class="form-input" 
               placeholder="Ej: Palermo, Belgrano, Caballito..." 
+              autocomplete="off"
               required
             >
             <input type="hidden" id="task-lat-input" value="">
@@ -543,7 +544,7 @@
                 <span>📍</span> Mi ubicación
               </button>
             </div>
-            <input type="text" id="profile-zone-input" class="form-input" placeholder="Ej: Palermo, Caballito...">
+            <input type="text" id="profile-zone-input" class="form-input" placeholder="Ej: Palermo, Caballito..." autocomplete="off">
             <input type="hidden" id="profile-lat-input" value="">
             <input type="hidden" id="profile-lng-input" value="">
           </div>

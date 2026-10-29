@@ -85,6 +85,7 @@ A continuación se detallan las etapas pendientes para convertir el prototipo en
 
 ### 🔔 Fase 4: Notificaciones y Geolocalización
 - [x] **Geolocalización Automática & Distancias (`js/geo.js`):**
+  - Autocompletado inteligente de barrios, ciudades y provincias argentinas en vivo (Photon/OpenStreetMap sin costos de API key de Google) al escribir en el formulario de publicación y en Mi Perfil.
   - Botón *"📍 Mi ubicación"* con reverse geocoding automático (OpenStreetMap + BigDataCloud) en formularios de publicación y perfil.
   - Cálculo de distancia en km (fórmula de Haversine) y badge en tarjetas de tareas (`📍 a 1.2 km`).
   - Botón de ordenamiento por cercanía (`📍 Más cercanos` / `⏱️ Más recientes`) en el muro de pedidos.

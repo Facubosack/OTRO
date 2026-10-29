@@ -1,4 +1,4 @@
-// OTRO - Geolocation & Distance Calculation Engine
+// OTRO - Geolocation, Autocomplete & Distance Calculation Engine
 const Geo = {
   userCoords: null, // { lat: number, lng: number, zone: string }
 
@@ -118,6 +118,167 @@ const Geo = {
       return `a ${meters} m`;
     }
     return `a ${distanceKm.toFixed(1)} km`;
+  },
+
+  /* -------------------------------------------------------------
+     AUTOCOMPLETE & SEARCH LOCATIONS (Tipo Google Maps sin costo)
+     ------------------------------------------------------------- */
+  async searchLocations(query) {
+    if (!query || query.trim().length < 3) return [];
+    const q = query.trim();
+
+    // 1. Try Photon Geocoder (rápido, pensado para autocompletar)
+    try {
+      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=6`;
+      const resp = await fetch(url);
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.features && data.features.length > 0) {
+          const results = [];
+          data.features.forEach(f => {
+            const props = f.properties || {};
+            const coords = f.geometry?.coordinates || [];
+            if (coords.length >= 2) {
+              const name = props.name || props.city || props.district;
+              const state = props.state || '';
+              const country = props.country || '';
+              const isAr = props.countrycode === 'AR' || (country && country.toLowerCase().includes('argentina'));
+
+              let detail = '';
+              if (state && country) detail = `${state}, ${country}`;
+              else if (state) detail = state;
+              else if (country) detail = country;
+
+              const label = detail ? `${name}, ${detail}` : name;
+              results.push({
+                name,
+                detail,
+                label,
+                lat: coords[1],
+                lng: coords[0],
+                isAr
+              });
+            }
+          });
+
+          // Prioritize Argentina matches
+          results.sort((a, b) => (b.isAr ? 1 : 0) - (a.isAr ? 1 : 0));
+          if (results.length > 0) return results.slice(0, 5);
+        }
+      }
+    } catch (err) {
+      console.warn("Photon autocomplete falló:", err);
+    }
+
+    // 2. Fallback Nominatim Search
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=ar&limit=5&addressdetails=1`;
+      const resp = await fetch(url, { headers: { 'Accept-Language': 'es' } });
+      if (resp.ok) {
+        const items = await resp.json();
+        return items.map(item => {
+          const addr = item.address || {};
+          const name = item.name || addr.suburb || addr.city || addr.town || addr.village;
+          const state = addr.state || addr.province || '';
+          const detail = state ? `${state}, Argentina` : 'Argentina';
+          return {
+            name,
+            detail,
+            label: `${name}, ${detail}`,
+            lat: parseFloat(item.lat),
+            lng: parseFloat(item.lon)
+          };
+        });
+      }
+    } catch (err) {
+      console.warn("Nominatim autocomplete falló:", err);
+    }
+
+    return [];
+  },
+
+  attachAutocomplete(inputEl, onSelect) {
+    if (!inputEl) return;
+
+    let debounceTimer = null;
+    let dropdown = null;
+
+    // Ensure parent has position relative
+    const parent = inputEl.parentElement;
+    if (parent && window.getComputedStyle(parent).position === 'static') {
+      parent.style.position = 'relative';
+    }
+
+    const removeDropdown = () => {
+      if (dropdown) {
+        dropdown.remove();
+        dropdown = null;
+      }
+    };
+
+    inputEl.addEventListener('input', (e) => {
+      const query = e.target.value.trim();
+      clearTimeout(debounceTimer);
+
+      if (query.length < 3) {
+        removeDropdown();
+        return;
+      }
+
+      debounceTimer = setTimeout(async () => {
+        const results = await Geo.searchLocations(query);
+        if (results.length === 0) {
+          removeDropdown();
+          return;
+        }
+
+        if (!dropdown) {
+          dropdown = document.createElement('div');
+          dropdown.className = 'geo-autocomplete-dropdown';
+          parent.appendChild(dropdown);
+        }
+
+        dropdown.innerHTML = results.map((r, idx) => `
+          <div class="geo-autocomplete-item" data-idx="${idx}">
+            <span class="geo-autocomplete-icon">📍</span>
+            <div class="geo-autocomplete-info">
+              <span class="geo-autocomplete-main">${Geo.escapeHTML(r.name)}</span>
+              <span class="geo-autocomplete-sub">${Geo.escapeHTML(r.detail)}</span>
+            </div>
+          </div>
+        `).join('');
+
+        dropdown.querySelectorAll('.geo-autocomplete-item').forEach(itemEl => {
+          itemEl.addEventListener('mousedown', (evt) => {
+            evt.preventDefault();
+            const idx = parseInt(itemEl.dataset.idx, 10);
+            const selected = results[idx];
+            if (selected) {
+              inputEl.value = selected.label;
+              if (typeof onSelect === 'function') {
+                onSelect(selected);
+              }
+            }
+            removeDropdown();
+          });
+        });
+      }, 280);
+    });
+
+    inputEl.addEventListener('blur', () => {
+      setTimeout(removeDropdown, 200);
+    });
+
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') removeDropdown();
+    });
+  },
+
+  escapeHTML(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
   }
 };
 

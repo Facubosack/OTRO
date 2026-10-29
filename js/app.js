@@ -180,6 +180,30 @@ const App = {
       detectProfileBtn.addEventListener('click', () => this.detectLocationForForm('profile'));
     }
 
+    // Attach location autocomplete to Task Publish input
+    const taskLocInput = document.getElementById('task-location-input');
+    if (taskLocInput && typeof Geo !== 'undefined') {
+      Geo.attachAutocomplete(taskLocInput, (selected) => {
+        const latInput = document.getElementById('task-lat-input');
+        const lngInput = document.getElementById('task-lng-input');
+        if (latInput) latInput.value = selected.lat;
+        if (lngInput) lngInput.value = selected.lng;
+        Geo.setUserCoords({ lat: selected.lat, lng: selected.lng, zone: selected.label });
+      });
+    }
+
+    // Attach location autocomplete to Profile input
+    const profileLocInput = document.getElementById('profile-zone-input');
+    if (profileLocInput && typeof Geo !== 'undefined') {
+      Geo.attachAutocomplete(profileLocInput, (selected) => {
+        const latInput = document.getElementById('profile-lat-input');
+        const lngInput = document.getElementById('profile-lng-input');
+        if (latInput) latInput.value = selected.lat;
+        if (lngInput) lngInput.value = selected.lng;
+        Geo.setUserCoords({ lat: selected.lat, lng: selected.lng, zone: selected.label });
+      });
+    }
+
     // Listen to location updates
     window.addEventListener('userLocationUpdated', () => {
       this.renderCurrentTab();

@@ -263,6 +263,11 @@ const Auth = {
     if (zoneInput) zoneInput.value = this.currentUser.zone || '';
     if (emailEl) emailEl.textContent = this.currentUser.email || 'Sin email';
 
+    const latInput = document.getElementById('profile-lat-input');
+    const lngInput = document.getElementById('profile-lng-input');
+    if (latInput) latInput.value = this.currentUser.lat || '';
+    if (lngInput) lngInput.value = this.currentUser.lng || '';
+
     if (this.currentUser.photoURL && photoEl) {
       photoEl.src = this.currentUser.photoURL;
       photoEl.style.display = 'block';
@@ -321,6 +326,8 @@ const Auth = {
 
     const hourlyRate = document.getElementById('profile-rate-input')?.value.trim() || '';
     const bio = document.getElementById('profile-bio-input')?.value.trim() || '';
+    const lat = document.getElementById('profile-lat-input')?.value || this.currentUser.lat || null;
+    const lng = document.getElementById('profile-lng-input')?.value || this.currentUser.lng || null;
 
     if (!name) {
       App.showToast('Por favor completá tu nombre.', '⚠️');
@@ -332,6 +339,8 @@ const Auth = {
       name,
       phone,
       zone: zone || 'CABA',
+      lat: lat ? parseFloat(lat) : null,
+      lng: lng ? parseFloat(lng) : null,
       role,
       trades,
       hourlyRate,

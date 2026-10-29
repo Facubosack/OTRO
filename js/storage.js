@@ -265,6 +265,24 @@ const Storage = {
     if (typeof isFirebaseReady !== 'undefined' && isFirebaseReady && db) {
       db.collection('tasks').doc(taskId).set(task).then(() => {
         console.log("☁️ Tarea sincronizada en Firestore:", taskId);
+
+        // Notify providers who do this trade
+        if (typeof Notifications !== 'undefined') {
+          db.collection('users').where('role', '==', 'provider').get().then(snap => {
+            snap.forEach(doc => {
+              const u = doc.data();
+              if (doc.id !== task.authorId && u.trades && u.trades.includes(task.category)) {
+                Notifications.createNotification({
+                  userId: doc.id,
+                  type: 'new_task',
+                  title: '⚡ Nuevo pedido en tu rubro',
+                  message: `Se publicó "${task.title}" en ${task.location}. ¡Sé el primero en postularte!`,
+                  taskId: task.id
+                });
+              }
+            });
+          }).catch(() => {});
+        }
       }).catch((err) => {
         console.error("Error al guardar en Firestore:", err);
         if (err && err.code === 'permission-denied') {
@@ -337,6 +355,17 @@ const Storage = {
           bids: task.bids
         }).then(() => {
           console.log("☁️ Presupuesto sincronizado en Firestore para tarea:", taskId);
+
+          // Notify task owner
+          if (typeof Notifications !== 'undefined' && task.authorId && task.authorId !== bidData.proId) {
+            Notifications.createNotification({
+              userId: task.authorId,
+              type: 'bid_received',
+              title: '📨 Nuevo presupuesto recibido',
+              message: `${bidData.proName} te envió una oferta de ${bidData.amount} para "${task.title}".`,
+              taskId: taskId
+            });
+          }
         }).catch((err) => {
           console.error("Error al enviar presupuesto a Firestore:", err);
         });
@@ -377,6 +406,17 @@ const Storage = {
           bids: task.bids
         }).then(() => {
           console.log("☁️ Presupuesto aceptado sincronizado en Firestore:", taskId);
+
+          // Notify provider that their bid was accepted!
+          if (typeof Notifications !== 'undefined' && task.assignedPro?.id) {
+            Notifications.createNotification({
+              userId: task.assignedPro.id,
+              type: 'bid_accepted',
+              title: '🎉 ¡Tu presupuesto fue aceptado!',
+              message: `El cliente confirmó tu presupuesto para "${task.title}". ¡Coordiná la visita por chat o WhatsApp!`,
+              taskId: taskId
+            });
+          }
         }).catch((err) => {
           console.error("Error al aceptar presupuesto en Firestore:", err);
         });

@@ -84,10 +84,15 @@ A continuación se detallan las etapas pendientes para convertir el prototipo en
   - "Mis Pedidos" vinculado al usuario autenticado en tiempo real.
 
 ### 🔔 Fase 4: Notificaciones y Geolocalización
-- [ ] **Notificaciones Push (Web Push):**
-  - Avisar al prestador: *"Hay un nuevo pedido de electricidad en tu barrio"*.
-  - Avisar al cliente: *"Matías te envió un presupuesto para tu pedido"*.
-- [ ] **Geolocalización automática:** Detección de barrio o distancia en kilómetros entre el cliente y el prestador.
+- [x] **Geolocalización Automática & Distancias (`js/geo.js`):**
+  - Botón *"📍 Mi ubicación"* con reverse geocoding automático (OpenStreetMap + BigDataCloud) en formularios de publicación y perfil.
+  - Cálculo de distancia en km (fórmula de Haversine) y badge en tarjetas de tareas (`📍 a 1.2 km`).
+  - Botón de ordenamiento por cercanía (`📍 Más cercanos` / `⏱️ Más recientes`) en el muro de pedidos.
+- [x] **Centro de Notificaciones en Tiempo Real & Web Push (`js/notifications.js`):**
+  - Campanita de notificaciones en la cabecera con contador de no leídas en vivo.
+  - Panel flotante con historial de notificaciones y botón "Marcar leídas".
+  - Alertas automáticas para clientes al recibir presupuestos y para prestadores al publicarse tareas de su oficio o aceptarse presupuestos.
+  - Soporte de notificaciones del sistema (Web Notification API).
 
 ### 💳 Fase 5: Expansión y Mejoras Opcionales
 - [ ] Galería de fotos reales de antes/después en los perfiles de los prestadores.

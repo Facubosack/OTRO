@@ -3,6 +3,7 @@ const App = {
   activeTab: 'feed', // 'feed' | 'pros' | 'my-tasks'
   activeCategory: 'all',
   searchQuery: '',
+  sortByProximity: false,
   currentViewingTaskId: null,
   currentBiddingTaskId: null,
 
@@ -159,6 +160,29 @@ const App = {
       if (this.activeTab === 'pros') {
         this.renderProsDirectory();
       }
+    });
+
+    // Proximity Sort Toggle Button
+    const sortGeoBtn = document.getElementById('btn-toggle-sort-geo');
+    if (sortGeoBtn) {
+      sortGeoBtn.addEventListener('click', () => this.toggleProximitySort());
+    }
+
+    // Geolocation detection button in Publish Modal
+    const detectPublishBtn = document.getElementById('btn-detect-location-publish');
+    if (detectPublishBtn) {
+      detectPublishBtn.addEventListener('click', () => this.detectLocationForForm('task'));
+    }
+
+    // Geolocation detection button in Profile Modal
+    const detectProfileBtn = document.getElementById('btn-detect-location-profile');
+    if (detectProfileBtn) {
+      detectProfileBtn.addEventListener('click', () => this.detectLocationForForm('profile'));
+    }
+
+    // Listen to location updates
+    window.addEventListener('userLocationUpdated', () => {
+      this.renderCurrentTab();
     });
   },
 
@@ -341,15 +365,34 @@ const App = {
       return;
     }
 
+    // Proximity sorting if enabled
+    const userCoords = (typeof Geo !== 'undefined') ? Geo.getUserCoords() : null;
+    if (this.sortByProximity && userCoords) {
+      tasks.sort((a, b) => {
+        const distA = (a.lat && a.lng) ? Geo.calculateDistanceKm(userCoords.lat, userCoords.lng, a.lat, a.lng) : 999999;
+        const distB = (b.lat && b.lng) ? Geo.calculateDistanceKm(userCoords.lat, userCoords.lng, b.lat, b.lng) : 999999;
+        return distA - distB;
+      });
+    }
+
     container.innerHTML = tasks.map(task => {
       const catObj = INITIAL_DATA.categories.find(c => c.id === task.category) || { name: 'Hogar', icon: '🏠' };
       const bidsCount = (task.bids || []).length;
       const urgencyClass = task.urgencyLevel || 'medium';
 
+      let distanceBadgeHtml = '';
+      if (userCoords && task.lat && task.lng && typeof Geo !== 'undefined') {
+        const distKm = Geo.calculateDistanceKm(userCoords.lat, userCoords.lng, task.lat, task.lng);
+        if (distKm !== null) {
+          distanceBadgeHtml = `<span class="distance-badge" title="Distancia calculada en línea recta">📍 ${Geo.formatDistance(distKm)}</span>`;
+        }
+      }
+
       return `
         <div class="task-card" data-task-id="${task.id}">
           <div class="task-card-header">
             <span class="task-category-badge">${catObj.icon} ${catObj.name}</span>
+            ${distanceBadgeHtml}
             ${(typeof Auth !== 'undefined' && Auth.currentUser && (task.authorId === Auth.currentUser.uid || task.clientName === Auth.currentUser.name)) ? `
               <span class="task-category-badge" style="background: var(--bg-warm); color: var(--brand-primary); font-weight: 700; border-color: var(--bg-warm-border);">👤 Tu pedido</span>
             ` : ''}
@@ -735,11 +778,18 @@ const App = {
 
     const currentUser = (typeof Auth !== 'undefined' && Auth.currentUser) ? Auth.currentUser : Storage.getUser();
 
+    const latVal = document.getElementById('task-lat-input')?.value;
+    const lngVal = document.getElementById('task-lng-input')?.value;
+    const lat = latVal ? parseFloat(latVal) : (typeof Geo !== 'undefined' && Geo.getUserCoords()?.lat ? Geo.getUserCoords().lat : null);
+    const lng = lngVal ? parseFloat(lngVal) : (typeof Geo !== 'undefined' && Geo.getUserCoords()?.lng ? Geo.getUserCoords().lng : null);
+
     Storage.createTask({
       title,
       category,
       description,
       location: location || currentUser.zone || 'CABA',
+      lat,
+      lng,
       budget: budget || 'A convenir',
       urgency,
       urgencyLevel,
@@ -840,6 +890,77 @@ const App = {
       modalElement.classList.remove('active');
       document.body.style.overflow = '';
     }
+  },
+
+  /* -------------------------------------------------------------
+     GEOLOCATION HELPERS
+     ------------------------------------------------------------- */
+  async detectLocationForForm(type) {
+    if (typeof Geo === 'undefined') return;
+
+    const btn = document.getElementById(type === 'task' ? 'btn-detect-location-publish' : 'btn-detect-location-profile');
+    const input = document.getElementById(type === 'task' ? 'task-location-input' : 'profile-zone-input');
+    const latInput = document.getElementById(type === 'task' ? 'task-lat-input' : 'profile-lat-input');
+    const lngInput = document.getElementById(type === 'task' ? 'task-lng-input' : 'profile-lng-input');
+
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳</span> Detectando...';
+    }
+
+    try {
+      const coords = await Geo.getCurrentPosition();
+      const zoneName = await Geo.reverseGeocode(coords.lat, coords.lng);
+
+      if (input) input.value = zoneName;
+      if (latInput) latInput.value = coords.lat;
+      if (lngInput) lngInput.value = coords.lng;
+
+      Geo.setUserCoords({ lat: coords.lat, lng: coords.lng, zone: zoneName });
+      this.showToast(`Ubicación detectada: ${zoneName}`, '📍');
+    } catch (err) {
+      console.error("Error al detectar ubicación:", err);
+      this.showToast(err.message || 'No se pudo obtener la ubicación GPS.', '⚠️');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span>📍</span> Mi ubicación';
+      }
+    }
+  },
+
+  async toggleProximitySort() {
+    if (typeof Geo === 'undefined') return;
+    const userCoords = Geo.getUserCoords();
+
+    if (!this.sortByProximity && (!userCoords || !userCoords.lat)) {
+      const btn = document.getElementById('btn-toggle-sort-geo');
+      if (btn) btn.innerHTML = '<span>⏳</span> Buscando GPS...';
+      try {
+        const coords = await Geo.getCurrentPosition();
+        const zoneName = await Geo.reverseGeocode(coords.lat, coords.lng);
+        Geo.setUserCoords({ lat: coords.lat, lng: coords.lng, zone: zoneName });
+        this.showToast(`Tu ubicación: ${zoneName}`, '📍');
+      } catch (err) {
+        this.showToast(err.message || 'Habilitá el GPS para ordenar por cercanía.', '⚠️');
+        if (btn) btn.innerHTML = '<span id="sort-geo-icon">📍</span> <span id="sort-geo-text">Más cercanos</span>';
+        return;
+      }
+    }
+
+    this.sortByProximity = !this.sortByProximity;
+    const sortBtn = document.getElementById('btn-toggle-sort-geo');
+    if (sortBtn) {
+      if (this.sortByProximity) {
+        sortBtn.classList.add('active');
+        sortBtn.innerHTML = '<span>⏱️</span> <span>Más recientes</span>';
+        this.showToast('Mostrando pedidos más cercanos a tu ubicación', '📍');
+      } else {
+        sortBtn.classList.remove('active');
+        sortBtn.innerHTML = '<span id="sort-geo-icon">📍</span> <span id="sort-geo-text">Más cercanos</span>';
+      }
+    }
+    this.renderTasksFeed();
   },
 
   /* -------------------------------------------------------------

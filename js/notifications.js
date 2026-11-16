@@ -133,10 +133,12 @@ const Notifications = {
       const data = {
         id: notifId,
         userId: notif.userId,
-        type: notif.type || 'info', // 'bid_received' | 'bid_accepted' | 'new_task' | 'info'
+        type: notif.type || 'info', // 'bid_received' | 'bid_accepted' | 'new_task' | 'new_message' | 'info'
         title: notif.title || 'Aviso en OTRO',
         message: notif.message || '',
         taskId: notif.taskId || null,
+        senderId: notif.senderId || null,
+        senderName: notif.senderName || null,
         read: false,
         createdAt: Date.now()
       };
@@ -230,6 +232,7 @@ const Notifications = {
       if (item.type === 'bid_received') icon = '📨';
       if (item.type === 'bid_accepted') icon = '🎉';
       if (item.type === 'new_task') icon = '⚡';
+      if (item.type === 'new_message') icon = '💬';
 
       return `
         <div class="notif-item ${item.read ? 'read' : 'unread'}" onclick="Notifications.handleItemClick('${item.id}', '${item.taskId || ''}')">
@@ -246,15 +249,23 @@ const Notifications = {
   },
 
   handleItemClick(notifId, taskId) {
+    const notif = this.list.find(n => n.id === notifId);
     this.markAsRead(notifId);
     const dropdown = document.getElementById('notif-dropdown');
     if (dropdown) dropdown.style.display = 'none';
 
-    if (taskId && typeof App !== 'undefined') {
-      const task = Storage.getTaskById(taskId);
-      if (task) {
-        App.openTaskDetailModal(taskId);
-      }
+    const task = taskId ? Storage.getTaskById(taskId) : null;
+
+    if (notif && notif.type === 'new_message' && notif.senderId && typeof ChatEngine !== 'undefined') {
+      ChatEngine.openChat({
+        id: notif.senderId,
+        name: notif.senderName || 'Vecino'
+      }, task);
+      return;
+    }
+
+    if (task && typeof App !== 'undefined') {
+      App.openTaskDetailModal(taskId);
     }
   },
 

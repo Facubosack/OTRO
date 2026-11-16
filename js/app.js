@@ -541,15 +541,43 @@ const App = {
               <span>💬 ${bidsCount} ${bidsCount === 1 ? 'oferta' : 'ofertas'}</span>
             </div>
 
-            ${role === 'provider' ? `
-              <button class="task-action-btn bid" onclick="App.openBidModal('${task.id}')">
-                ⚡ Postularme
-              </button>
-            ` : `
-              <button class="task-action-btn view" onclick="App.openTaskDetailModal('${task.id}')">
-                Ver Detalles / Ofertas ➜
-              </button>
-            `}
+            ${(() => {
+              const currUser = (typeof Auth !== 'undefined' && Auth.currentUser) ? Auth.currentUser : null;
+              const isOwn = currUser && (task.authorId === currUser.uid || task.clientName === currUser.name);
+              const myBid = currUser && (task.bids || []).find(b => b.proId === currUser.uid);
+
+              if (isOwn) {
+                return `
+                  <button class="task-action-btn view" onclick="App.openTaskDetailModal('${task.id}')">
+                    Ver Detalles / Ofertas ➜
+                  </button>
+                `;
+              }
+              if (role === 'provider') {
+                if (myBid) {
+                  return `
+                    <button class="task-action-btn view" onclick="App.openTaskDetailModal('${task.id}')">
+                      ${myBid.status === 'accepted' ? '🎉 Match · Chatear con Cliente' : '💬 Ver mi oferta / Chat'}
+                    </button>
+                  `;
+                }
+                return `
+                  <div style="display: flex; gap: 6px;">
+                    <button class="btn-secondary" style="font-size: 0.78rem; padding: 6px 10px;" onclick="App.openTaskDetailModal('${task.id}')">
+                      Ver
+                    </button>
+                    <button class="task-action-btn bid" onclick="App.openBidModal('${task.id}')">
+                      ⚡ Postularme
+                    </button>
+                  </div>
+                `;
+              }
+              return `
+                <button class="task-action-btn view" onclick="App.openTaskDetailModal('${task.id}')">
+                  Ver Detalles / Ofertas ➜
+                </button>
+              `;
+            })()}
           </div>
         </div>
       `;
@@ -761,6 +789,10 @@ const App = {
     const bodyEl = document.getElementById('detail-modal-body');
     if (!titleEl || !bodyEl) return;
 
+    const currentUser = (typeof Auth !== 'undefined' && Auth.currentUser) ? Auth.currentUser : null;
+    const isTaskOwner = !!(currentUser && (task.authorId === currentUser.uid || task.clientName === currentUser.name));
+    const clientFirstName = (task.clientName || 'el cliente').split(' ')[0];
+
     const catObj = INITIAL_DATA.categories.find(c => c.id === task.category) || { name: 'Hogar', icon: '🏠' };
     titleEl.textContent = task.title;
 
@@ -771,17 +803,62 @@ const App = {
       bidsHtml = `
         <div class="empty-state-card" style="padding: 20px;">
           <p>Aún no hay ofertas de profesionales para este pedido.</p>
-          <span style="font-size: 0.8rem; color: var(--brand-primary);">Los prestadores verificados de la zona recibirán una notificación.</span>
+          ${isTaskOwner ? `
+            <span style="font-size: 0.8rem; color: var(--brand-primary);">Los prestadores verificados de la zona recibirán una notificación.</span>
+          ` : `
+            <button class="btn-primary" style="margin-top: 8px; font-size: 0.82rem;" onclick="App.closeModal(document.getElementById('task-detail-modal')); App.openBidModal('${task.id}')">
+              ⚡ Enviar el primer presupuesto
+            </button>
+          `}
         </div>
       `;
     } else {
       bidsHtml = bids.map(bid => {
         const isAccepted = bid.status === 'accepted';
+        const isMyBid = !!(currentUser && String(bid.proId) === String(currentUser.uid));
+        const proFirstName = (bid.proName || 'Prestador').split(' ')[0];
+
+        let actionsHtml = '';
+        if (isTaskOwner) {
+          // I am the Client: I chat with the Provider (bid.proId) and can accept their bid
+          actionsHtml = isAccepted ? `
+            <span style="color: var(--color-success); font-weight: 700; font-size: 0.85rem;">✅ Presupuesto Aceptado</span>
+            <button class="btn-chat-in-app" onclick="App.openProChat('${bid.proId}', '${task.id}')">
+              💬 Chatear con ${this.escapeHTML(proFirstName)}
+            </button>
+          ` : `
+            <button class="btn-secondary" style="font-size: 0.8rem;" onclick="App.openProChat('${bid.proId}', '${task.id}')">
+              💬 Chatear con ${this.escapeHTML(proFirstName)}
+            </button>
+            <button class="btn-primary" style="font-size: 0.8rem; padding: 6px 14px;" onclick="App.acceptBid('${task.id}', '${bid.id}')">
+              Aceptar Presupuesto
+            </button>
+          `;
+        } else if (isMyBid) {
+          // I am the Provider who sent this bid: I chat with the Client (task.authorId), NOT with myself!
+          actionsHtml = isAccepted ? `
+            <span style="color: var(--color-success); font-weight: 700; font-size: 0.85rem;">🎉 ¡El cliente aceptó tu oferta!</span>
+            <button class="btn-chat-in-app" onclick="App.openProChat('${task.authorId}', '${task.id}')">
+              💬 Chatear con ${this.escapeHTML(clientFirstName)}
+            </button>
+          ` : `
+            <span style="color: var(--text-muted); font-size: 0.8rem;">⏳ Tu oferta fue enviada</span>
+            <button class="btn-secondary" style="font-size: 0.8rem;" onclick="App.openProChat('${task.authorId}', '${task.id}')">
+              💬 Chatear con ${this.escapeHTML(clientFirstName)}
+            </button>
+          `;
+        } else {
+          // Another user viewing this bid
+          actionsHtml = isAccepted ? `
+            <span style="color: var(--color-success); font-weight: 700; font-size: 0.82rem;">✅ Asignado</span>
+          ` : '';
+        }
+
         return `
           <div class="bid-item-card ${isAccepted ? 'accepted' : ''}">
             <div class="bid-item-header">
               <div class="bid-pro-info">
-                <span class="bid-pro-name">👤 ${this.escapeHTML(bid.proName)}</span>
+                <span class="bid-pro-name">🧰 ${this.escapeHTML(bid.proName)} ${isMyBid ? '<small style="color:var(--brand-primary);">(Vos)</small>' : ''}</span>
                 <span style="color: var(--color-warning); font-size: 0.8rem;">★ ${bid.proRating}</span>
               </div>
               <div class="bid-amount">${this.escapeHTML(bid.amount)}</div>
@@ -791,28 +868,18 @@ const App = {
             <div style="font-size: 0.74rem; color: var(--text-subtle);">Enviado: ${bid.date}</div>
 
             <div class="bid-actions-row">
-              ${isAccepted ? `
-                <span style="color: var(--color-success); font-weight: 700; font-size: 0.85rem;">✅ Presupuesto Aceptado</span>
-                <button class="btn-chat-in-app" onclick="App.openProChat('${bid.proId}', '${task.id}')">
-                  Abrir Chat 💬
-                </button>
-              ` : `
-                <button class="btn-secondary" style="font-size: 0.8rem;" onclick="App.openProChat('${bid.proId}', '${task.id}')">
-                  Hacer una pregunta
-                </button>
-                <button class="btn-primary" style="font-size: 0.8rem; padding: 6px 14px;" onclick="App.acceptBid('${task.id}', '${bid.id}')">
-                  Aceptar Presupuesto
-                </button>
-              `}
+              ${actionsHtml}
             </div>
           </div>
         `;
       }).join('');
     }
 
+    const hasMyBidAlready = !!(currentUser && bids.some(b => String(b.proId) === String(currentUser.uid)));
+
     bodyEl.innerHTML = `
       <div style="background: var(--bg-subtle); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-light);">
-        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+        <div style="display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
           <span class="task-category-badge">${catObj.icon} ${catObj.name}</span>
           <span class="urgency-badge ${task.urgencyLevel || 'medium'}">⏱️ ${task.urgency}</span>
         </div>
@@ -822,7 +889,21 @@ const App = {
         <div style="font-size: 0.82rem; color: var(--text-muted); display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
           <div>📍 Zona: <strong>${this.escapeHTML(task.location)}</strong></div>
           <div>💰 Presupuesto estimado: <strong style="color: var(--color-success);">${this.escapeHTML(task.budget)}</strong></div>
+          <div>👤 Solicitante: <strong>${this.escapeHTML(task.clientName || 'Vecino')}</strong></div>
         </div>
+
+        ${!isTaskOwner ? `
+          <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border-light); display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">
+            <button class="btn-secondary" style="font-size: 0.8rem; padding: 6px 12px;" onclick="App.openProChat('${task.authorId}', '${task.id}')">
+              💬 Consultar a ${this.escapeHTML(clientFirstName)}
+            </button>
+            ${!hasMyBidAlready && task.status === 'open' ? `
+              <button class="btn-primary" style="font-size: 0.8rem; padding: 6px 14px;" onclick="App.closeModal(document.getElementById('task-detail-modal')); App.openBidModal('${task.id}')">
+                ⚡ Pasar presupuesto
+              </button>
+            ` : ''}
+          </div>
+        ` : ''}
       </div>
 
       <div style="margin-top: 10px;">
@@ -944,9 +1025,16 @@ const App = {
       return;
     }
 
-    this.currentBiddingTaskId = taskId;
     const task = Storage.getTaskById(taskId);
     if (!task) return;
+
+    if (typeof Auth !== 'undefined' && Auth.currentUser && task.authorId === Auth.currentUser.uid) {
+      this.showToast('Este pedido fue publicado por vos.', 'ℹ️');
+      this.openTaskDetailModal(taskId);
+      return;
+    }
+
+    this.currentBiddingTaskId = taskId;
 
     const modal = document.getElementById('submit-bid-modal');
     const taskTitleEl = document.getElementById('bid-target-task-title');
@@ -975,7 +1063,8 @@ const App = {
 
     Storage.addBidToTask(this.currentBiddingTaskId, {
       proId: currentUser.uid || 'pro-1',
-      proName: currentUser.name || 'Matías Benítez',
+      proName: currentUser.name || 'Prestador',
+      proPhoto: currentUser.photoURL || '',
       proRating: 5.0,
       amount: '$' + amount.replace('$', ''),
       message,

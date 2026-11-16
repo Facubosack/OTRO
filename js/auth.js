@@ -216,10 +216,11 @@ const Auth = {
       }
       this.currentUser = null;
       localStorage.removeItem(STORAGE_KEYS.USER);
+      localStorage.removeItem('otro_welcome_seen');
       this.closeProfileModal();
       this.updateUI();
       App.showToast('Sesión cerrada correctamente.', '🔒');
-      App.switchTab('feed');
+      App.showWelcomeView();
     }
   },
 

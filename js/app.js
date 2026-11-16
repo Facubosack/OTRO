@@ -9,8 +9,30 @@ const App = {
   currentBiddingTaskId: null,
 
   init() {
+    this.initInitialView();
     this.bindEvents();
     this.renderAll();
+  },
+
+  isUserLoggedIn() {
+    if (typeof Auth !== 'undefined' && Auth.currentUser && Auth.currentUser.uid) {
+      return true;
+    }
+    try {
+      const savedUser = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER) || 'null');
+      return !!(savedUser && savedUser.uid);
+    } catch (e) {
+      return false;
+    }
+  },
+
+  initInitialView() {
+    const hasSeenWelcome = localStorage.getItem('otro_welcome_seen') === 'true';
+    if (this.isUserLoggedIn() || hasSeenWelcome) {
+      this.enterApp('feed', null, false);
+    } else {
+      this.showWelcomeView(false);
+    }
   },
 
   bindEvents() {
@@ -158,7 +180,14 @@ const App = {
     });
 
     // Listen to user authentication changes
-    window.addEventListener('userAuthChanged', () => {
+    window.addEventListener('userAuthChanged', (e) => {
+      const loggedInUser = e.detail && e.detail.user;
+      if (loggedInUser) {
+        // User is logged in: never show the welcome screen again
+        localStorage.setItem('otro_welcome_seen', 'true');
+        this.enterApp(this.activeTab || 'feed', null, false);
+      }
+      this.updateHeaderInfoButton();
       this.renderCurrentTab();
       this.updateCounts();
     });
@@ -221,35 +250,59 @@ const App = {
   /* -------------------------------------------------------------
      NAVIGATION BETWEEN WELCOME PAGE & CLEAN MAIN APP VIEW
      ------------------------------------------------------------- */
-  enterApp(tab = 'feed', role = null) {
+  updateHeaderInfoButton() {
+    const headerInfoBtn = document.getElementById('header-info-btn');
+    if (!headerInfoBtn) return;
+
+    // Only show "¿Cómo funciona?" if the user is in the app view AND not logged in
+    if (this.currentView === 'app' && !this.isUserLoggedIn()) {
+      headerInfoBtn.style.display = 'inline-flex';
+    } else {
+      headerInfoBtn.style.display = 'none';
+    }
+  },
+
+  enterApp(tab = 'feed', role = null, scroll = true) {
     if (role) {
       Storage.setRole(role);
     }
 
+    localStorage.setItem('otro_welcome_seen', 'true');
     this.currentView = 'app';
+
     const welcomeView = document.getElementById('welcome-view');
     const appMainView = document.getElementById('app-main-view');
-    const headerInfoBtn = document.getElementById('header-info-btn');
 
     if (welcomeView) welcomeView.style.display = 'none';
     if (appMainView) appMainView.style.display = 'block';
-    if (headerInfoBtn) headerInfoBtn.style.display = 'inline-flex';
 
+    this.updateHeaderInfoButton();
     this.switchTab(tab);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (scroll) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   },
 
-  showWelcomeView() {
+  showWelcomeView(scroll = true) {
+    // If user is already logged in, keep them on the clean main screen
+    if (this.isUserLoggedIn()) {
+      this.enterApp('feed', null, false);
+      return;
+    }
+
     this.currentView = 'welcome';
     const welcomeView = document.getElementById('welcome-view');
     const appMainView = document.getElementById('app-main-view');
-    const headerInfoBtn = document.getElementById('header-info-btn');
 
     if (welcomeView) welcomeView.style.display = 'block';
     if (appMainView) appMainView.style.display = 'none';
-    if (headerInfoBtn) headerInfoBtn.style.display = 'none';
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.updateHeaderInfoButton();
+
+    if (scroll) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   },
 
   renderAll() {

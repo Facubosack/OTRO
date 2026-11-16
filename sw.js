@@ -1,8 +1,8 @@
-const CACHE_NAME = 'otro-pwa-v12';
+const CACHE_NAME = 'otro-pwa-v13';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './css/style.css?v=2.7',
+  './css/style.css?v=2.8',
   './js/firebase-config.js',
   './js/geo.js',
   './js/data.js',

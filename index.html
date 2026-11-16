@@ -21,7 +21,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet -->
-  <link rel="stylesheet" href="./css/style.css?v=2.7">
+  <link rel="stylesheet" href="./css/style.css?v=2.8">
 </head>
 <body>
 
@@ -39,7 +39,7 @@
     <!-- Top Sticky Header -->
     <header class="main-header">
       <div class="header-content">
-        <div class="brand-wrapper" onclick="App.switchTab('feed')">
+        <div class="brand-wrapper" onclick="App.enterApp('feed')" title="Ir al muro principal">
           <img src="./assets/logo.svg" alt="Logo OTRO" class="brand-logo-img">
           <div class="brand-text-col">
             <h1 class="brand-title">
@@ -47,11 +47,17 @@
               <span class="badge-pill">EN EL BARRIO</span>
               <span id="cloud-sync-badge" class="badge-pill sync-pill" title="Sincronización en tiempo real con Firebase">🟢 EN VIVO</span>
             </h1>
-            <span class="brand-motto">¿Necesitás un servicio en tu hogar? Buscá a otro que lo haga por vos</span>
+            <span class="brand-motto">Buscá a otro que lo haga por vos</span>
           </div>
         </div>
 
         <div class="header-actions">
+          <!-- Button to view Welcome / Info page -->
+          <button id="header-info-btn" class="btn-secondary btn-header-info" onclick="App.showWelcomeView()" title="Ver cómo funciona OTRO" style="display: none;">
+            <span>ℹ️</span>
+            <span class="info-btn-text">¿Cómo funciona?</span>
+          </button>
+
           <!-- Segmented Role Switcher -->
           <div class="role-toggle-group">
             <button class="role-btn active" data-role-switch="client" title="Modo Cliente: Publicar y pedir ayuda">
@@ -102,145 +108,191 @@
 
     <!-- Main Content Area -->
     <main>
-      <!-- Hero Section: Cálido, Humano y Casero -->
-      <section class="hero-warm-section">
-        <div class="hero-pill-badge">
-          <span>🏡</span> Red comunitaria de servicios para el hogar
-        </div>
 
-        <h2 class="hero-title-main">
-          ¿Necesitás un servicio en tu hogar? <br>
-          Buscá a <span class="highlight-word">otro que lo haga por vos</span>
-        </h2>
+      <!-- ========================================================
+           PÁGINA 1: BIENVENIDA E INFORMACIÓN (LANDING INICIAL)
+           ======================================================== -->
+      <div id="welcome-view" class="welcome-view-container">
+        <section class="hero-warm-section welcome-hero-card">
+          <div class="hero-pill-badge">
+            <span>🏡</span> Red comunitaria de servicios para el hogar
+          </div>
 
-        <p class="hero-desc">
-          Colgar un cuadro, reparar una pérdida de agua, pintar una pieza o armar un mueble nuevo. 
-          Publicá lo que necesitás, recibí ofertas de gente de oficio en tu zona y coordiná de forma directa.
-        </p>
+          <h2 class="hero-title-main">
+            ¿Necesitás un servicio en tu hogar? <br>
+            Buscá a <span class="highlight-word">otro que lo haga por vos</span>
+          </h2>
 
-        <div class="hero-buttons-row">
-          <button class="btn-primary" data-open-publish style="padding: 11px 24px; font-size: 0.95rem;">
-            <span>✏️</span> Publicar lo que necesitás
-          </button>
-          <button class="btn-secondary" onclick="App.switchTab('pros')" style="padding: 10px 20px; font-size: 0.92rem;">
-            <span>👥</span> Ver Especialistas del Barrio
-          </button>
-        </div>
+          <p class="hero-desc">
+            Colgar un cuadro, reparar una pérdida de agua, pintar una pieza o armar un mueble nuevo. 
+            Publicá lo que necesitás, recibí ofertas de gente de oficio en tu zona y coordiná de forma directa.
+          </p>
 
-        <!-- 3 Pilares de Confianza Cercanos -->
-        <div class="trust-pillars-row">
-          <div class="trust-pillar-card">
-            <div class="trust-icon-box">🤝</div>
-            <div class="trust-text">
-              <h4>Trato directo</h4>
-              <p>Hablás directamente por WhatsApp o chat con la persona que viene a tu casa.</p>
+          <!-- Accesos directos a la Pantalla Principal Limpia -->
+          <div class="welcome-cta-group">
+            <button class="btn-primary btn-welcome-main" onclick="App.enterApp('feed')">
+              <span>🚀</span> Ir a la Plataforma
+            </button>
+
+            <div class="welcome-role-cards">
+              <button class="welcome-role-option" onclick="App.enterApp('feed', 'client')">
+                <span class="welcome-role-icon">👤</span>
+                <div class="welcome-role-text">
+                  <strong>Necesito ayuda en casa</strong>
+                  <span>Publicar un pedido gratis o buscar especialistas</span>
+                </div>
+                <span class="welcome-role-arrow">➜</span>
+              </button>
+
+              <button class="welcome-role-option" onclick="App.enterApp('feed', 'provider')">
+                <span class="welcome-role-icon">🧰</span>
+                <div class="welcome-role-text">
+                  <strong>Soy un "Otro" (Prestador)</strong>
+                  <span>Ver pedidos abiertos en mi barrio y pasar presupuesto</span>
+                </div>
+                <span class="welcome-role-arrow">➜</span>
+              </button>
             </div>
           </div>
 
-          <div class="trust-pillar-card">
-            <div class="trust-icon-box">📍</div>
-            <div class="trust-text">
-              <h4>Gente de tu zona</h4>
-              <p>Profesionales y personas de oficio verificadas en tu mismo barrio o localidad.</p>
+          <!-- 3 Pilares de Confianza Cercanos -->
+          <div class="trust-pillars-row">
+            <div class="trust-pillar-card">
+              <div class="trust-icon-box">🤝</div>
+              <div class="trust-text">
+                <h4>Trato directo</h4>
+                <p>Hablás directamente por WhatsApp o chat con la persona que viene a tu casa.</p>
+              </div>
+            </div>
+
+            <div class="trust-pillar-card">
+              <div class="trust-icon-box">📍</div>
+              <div class="trust-text">
+                <h4>Gente de tu zona</h4>
+                <p>Profesionales y personas de oficio verificadas en tu mismo barrio o localidad.</p>
+              </div>
+            </div>
+
+            <div class="trust-pillar-card">
+              <div class="trust-icon-box">💬</div>
+              <div class="trust-text">
+                <h4>Presupuestos claros</h4>
+                <p>Te pasan el precio estimado antes de empezar, sin comisiones ocultas.</p>
+              </div>
             </div>
           </div>
 
-          <div class="trust-pillar-card">
-            <div class="trust-icon-box">💬</div>
-            <div class="trust-text">
-              <h4>Presupuestos claros</h4>
-              <p>Te pasan el precio estimado antes de empezar, sin comisiones ocultas.</p>
+          <!-- Cómo funciona en 3 pasos simples -->
+          <div class="welcome-steps-strip">
+            <div class="welcome-step-item">
+              <span class="step-num">1</span>
+              <span><strong>Publicás gratis</strong> lo que necesitás resolver en tu casa</span>
+            </div>
+            <div class="welcome-step-item">
+              <span class="step-num">2</span>
+              <span><strong>Recibís ofertas</strong> de vecinos y especialistas de tu zona</span>
+            </div>
+            <div class="welcome-step-item">
+              <span class="step-num">3</span>
+              <span><strong>Elegís y coordinás</strong> directo por chat o WhatsApp</span>
             </div>
           </div>
-        </div>
-      </section>
-
-      <!-- Active Role Callout Banner -->
-      <div id="role-callout-banner" class="role-callout">
-        <!-- Rendered dynamically by JS -->
+        </section>
       </div>
 
-      <!-- Search & Category Filters Bar -->
-      <section class="search-filter-section">
-        <div class="search-box-wrapper">
-          <span class="search-icon">🔍</span>
-          <input 
-            type="text" 
-            id="search-input" 
-            class="search-input" 
-            placeholder="¿Qué necesitás resolver? Ej: pérdida de agua, colgar cortinas, pintar pieza, flete..." 
-            autocomplete="off"
-          >
-          <button id="search-clear" class="search-clear-btn" title="Limpiar búsqueda">✕</button>
+      <!-- ========================================================
+           PÁGINA 2: PANTALLA PRINCIPAL LIMPIA DE LA APP
+           ======================================================== -->
+      <div id="app-main-view" class="app-main-view" style="display: none;">
+
+        <!-- Active Role Callout Banner (Compact) -->
+        <div id="role-callout-banner" class="role-callout">
+          <!-- Rendered dynamically by JS -->
         </div>
 
-        <!-- Horizontal scroll of category chips -->
-        <div class="categories-nav-wrapper">
-          <div id="categories-nav" class="categories-scroll">
-            <!-- Categories rendered dynamically -->
+        <!-- Search & Category Filters Bar -->
+        <section class="search-filter-section">
+          <div class="search-box-wrapper">
+            <span class="search-icon">🔍</span>
+            <input 
+              type="text" 
+              id="search-input" 
+              class="search-input" 
+              placeholder="¿Qué necesitás resolver? Ej: pérdida de agua, colgar cortinas, pintar pieza, flete..." 
+              autocomplete="off"
+            >
+            <button id="search-clear" class="search-clear-btn" title="Limpiar búsqueda">✕</button>
           </div>
-        </div>
-      </section>
 
-      <!-- Navigation Tabs Bar -->
-      <nav class="nav-tabs-bar">
-        <button class="tab-btn active" data-tab="feed">
-          <span>📋</span> Pedidos del Barrio
-          <span id="tab-feed-badge" class="tab-badge">0</span>
-        </button>
-        <button class="tab-btn" data-tab="pros">
-          <span>👥</span> Especialistas ("Otros")
-        </button>
-        <button class="tab-btn" data-tab="my-tasks">
-          <span>📌</span> Mis Pedidos
-          <span id="tab-my-tasks-badge" class="tab-badge">0</span>
-        </button>
-      </nav>
+          <!-- Horizontal scroll of category chips -->
+          <div class="categories-nav-wrapper">
+            <div id="categories-nav" class="categories-scroll">
+              <!-- Categories rendered dynamically -->
+            </div>
+          </div>
+        </section>
 
-      <!-- VIEW 1: FEED OF TASKS / PEDIDOS -->
-      <section id="tasks-feed-section">
-        <div class="section-header-row">
-          <h2 class="section-title">
-            <span>📌</span> Tareas y pedidos abiertos
-          </h2>
-          <div class="section-actions">
-            <button id="btn-toggle-sort-geo" class="btn-secondary btn-sort-geo" style="font-size: 0.8rem; padding: 6px 12px;" title="Ordenar pedidos por cercanía a tu ubicación">
-              <span id="sort-geo-icon">📍</span>
-              <span id="sort-geo-text">Más cercanos</span>
+        <!-- Navigation Tabs Bar -->
+        <nav class="nav-tabs-bar">
+          <button class="tab-btn active" data-tab="feed">
+            <span>📋</span> Pedidos del Barrio
+            <span id="tab-feed-badge" class="tab-badge">0</span>
+          </button>
+          <button class="tab-btn" data-tab="pros">
+            <span>👥</span> Especialistas ("Otros")
+          </button>
+          <button class="tab-btn" data-tab="my-tasks">
+            <span>📌</span> Mis Pedidos
+            <span id="tab-my-tasks-badge" class="tab-badge">0</span>
+          </button>
+        </nav>
+
+        <!-- VIEW 1: FEED OF TASKS / PEDIDOS -->
+        <section id="tasks-feed-section">
+          <div class="section-header-row">
+            <h2 class="section-title">
+              <span>📌</span> Tareas y pedidos abiertos
+            </h2>
+            <div class="section-actions">
+              <button id="btn-toggle-sort-geo" class="btn-secondary btn-sort-geo" style="font-size: 0.8rem; padding: 6px 12px;" title="Ordenar pedidos por cercanía a tu ubicación">
+                <span id="sort-geo-icon">📍</span>
+                <span id="sort-geo-text">Más cercanos</span>
+              </button>
+            </div>
+          </div>
+          <div id="tasks-feed-grid" class="tasks-grid">
+            <!-- Rendered dynamically -->
+          </div>
+        </section>
+
+        <!-- VIEW 2: PROS DIRECTORY ("LOS OTROS") -->
+        <section id="pros-directory-section" style="display: none;">
+          <div class="section-header-row">
+            <h2 class="section-title">
+              <span>🛡️</span> Especialistas y personas de confianza
+            </h2>
+          </div>
+          <div id="pros-directory-grid" class="pros-grid">
+            <!-- Rendered dynamically -->
+          </div>
+        </section>
+
+        <!-- VIEW 3: MY TASKS & ACTIVITY -->
+        <section id="my-tasks-section" style="display: none;">
+          <div class="section-header-row">
+            <h2 class="section-title">
+              <span>💼</span> Mis pedidos publicados
+            </h2>
+            <button class="btn-primary" data-open-publish style="font-size: 0.82rem; padding: 6px 14px;">
+              <span>➕</span> Nuevo pedido
             </button>
           </div>
-        </div>
-        <div id="tasks-feed-grid" class="tasks-grid">
-          <!-- Rendered dynamically -->
-        </div>
-      </section>
+          <div id="my-tasks-grid" class="tasks-grid">
+            <!-- Rendered dynamically -->
+          </div>
+        </section>
 
-      <!-- VIEW 2: PROS DIRECTORY ("LOS OTROS") -->
-      <section id="pros-directory-section" style="display: none;">
-        <div class="section-header-row">
-          <h2 class="section-title">
-            <span>🛡️</span> Especialistas y personas de confianza
-          </h2>
-        </div>
-        <div id="pros-directory-grid" class="pros-grid">
-          <!-- Rendered dynamically -->
-        </div>
-      </section>
-
-      <!-- VIEW 3: MY TASKS & ACTIVITY -->
-      <section id="my-tasks-section" style="display: none;">
-        <div class="section-header-row">
-          <h2 class="section-title">
-            <span>💼</span> Mis pedidos publicados
-          </h2>
-          <button class="btn-primary" data-open-publish style="font-size: 0.82rem; padding: 6px 14px;">
-            <span>➕</span> Nuevo pedido
-          </button>
-        </div>
-        <div id="my-tasks-grid" class="tasks-grid">
-          <!-- Rendered dynamically -->
-        </div>
-      </section>
+      </div><!-- /app-main-view -->
     </main>
 
   </div><!-- /app-container -->

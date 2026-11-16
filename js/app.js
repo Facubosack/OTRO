@@ -1,5 +1,6 @@
 // OTRO - Main Application Controller
 const App = {
+  currentView: 'welcome', // 'welcome' | 'app'
   activeTab: 'feed', // 'feed' | 'pros' | 'my-tasks'
   activeCategory: 'all',
   searchQuery: '',
@@ -18,6 +19,9 @@ const App = {
       btn.addEventListener('click', (e) => {
         const role = e.currentTarget.dataset.roleSwitch;
         Storage.setRole(role);
+        if (this.currentView === 'welcome') {
+          this.enterApp('feed');
+        }
       });
     });
 
@@ -30,7 +34,11 @@ const App = {
     document.querySelectorAll('[data-tab]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const tab = e.currentTarget.dataset.tab;
-        this.switchTab(tab);
+        if (this.currentView === 'welcome') {
+          this.enterApp(tab);
+        } else {
+          this.switchTab(tab);
+        }
       });
     });
 
@@ -210,6 +218,40 @@ const App = {
     });
   },
 
+  /* -------------------------------------------------------------
+     NAVIGATION BETWEEN WELCOME PAGE & CLEAN MAIN APP VIEW
+     ------------------------------------------------------------- */
+  enterApp(tab = 'feed', role = null) {
+    if (role) {
+      Storage.setRole(role);
+    }
+
+    this.currentView = 'app';
+    const welcomeView = document.getElementById('welcome-view');
+    const appMainView = document.getElementById('app-main-view');
+    const headerInfoBtn = document.getElementById('header-info-btn');
+
+    if (welcomeView) welcomeView.style.display = 'none';
+    if (appMainView) appMainView.style.display = 'block';
+    if (headerInfoBtn) headerInfoBtn.style.display = 'inline-flex';
+
+    this.switchTab(tab);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  },
+
+  showWelcomeView() {
+    this.currentView = 'welcome';
+    const welcomeView = document.getElementById('welcome-view');
+    const appMainView = document.getElementById('app-main-view');
+    const headerInfoBtn = document.getElementById('header-info-btn');
+
+    if (welcomeView) welcomeView.style.display = 'block';
+    if (appMainView) appMainView.style.display = 'none';
+    if (headerInfoBtn) headerInfoBtn.style.display = 'none';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  },
+
   renderAll() {
     this.updateRoleUI(Storage.getRole());
     this.renderCategoriesNav();
@@ -228,14 +270,14 @@ const App = {
       }
     });
 
-    // Role callout message
+    // Role callout message (compact & clean on the main app view)
     const calloutContainer = document.getElementById('role-callout-banner');
     if (calloutContainer) {
       if (role === 'client') {
         calloutContainer.innerHTML = `
           <div class="role-callout-text">
             <span>👤</span>
-            <div>Estás navegando en <strong>Modo Cliente</strong>: Podés publicar necesidades para tu hogar y comparar ofertas de prestadores.</div>
+            <div><strong>Modo Cliente:</strong> Publicá lo que necesitás o buscá especialistas.</div>
           </div>
           <span class="role-switch-link" data-role-switch="provider">Cambiar a Soy un "Otro" ➜</span>
         `;
@@ -243,7 +285,7 @@ const App = {
         calloutContainer.innerHTML = `
           <div class="role-callout-text">
             <span>🧰</span>
-            <div>Estás navegando en <strong>Modo Prestador ("Soy un Otro")</strong>: Explorá pedidos activos y enviá tus presupuestos para conseguir nuevos trabajos.</div>
+            <div><strong>Modo Prestador ("Otro"):</strong> Postulate a pedidos abiertos en tu zona.</div>
           </div>
           <span class="role-switch-link" data-role-switch="client">Cambiar a Modo Cliente ➜</span>
         `;
@@ -836,8 +878,7 @@ const App = {
     if (searchClear) searchClear.classList.remove('visible');
 
     this.renderCategoriesNav();
-    this.switchTab('feed');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.enterApp('feed');
     this.showToast('¡Tu pedido fue publicado y ya aparece primero en el muro!', '🚀');
   },
 

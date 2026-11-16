@@ -2462,3 +2462,206 @@ a {
     font-size: 16px !important;
   }
 }
+
+
+/* ========================================================
+   PÁGINA 1: BIENVENIDA / PRESENTACIÓN (WELCOME VIEW)
+   & PÁGINA 2: PANTALLA PRINCIPAL LIMPIA
+   ======================================================== */
+.welcome-view-container {
+  max-width: 920px;
+  margin: 8px auto 32px;
+  animation: fadeInView 0.25s ease-out;
+}
+
+.app-main-view {
+  animation: fadeInView 0.22s ease-out;
+}
+
+@keyframes fadeInView {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.welcome-hero-card {
+  padding: 42px 38px 34px;
+  box-shadow: var(--shadow-md);
+}
+
+.welcome-cta-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin: 24px auto 30px;
+  max-width: 680px;
+}
+
+.btn-welcome-main {
+  font-size: 1.05rem;
+  padding: 14px 34px;
+  box-shadow: 0 6px 18px rgba(234, 88, 12, 0.3);
+}
+
+.welcome-role-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  width: 100%;
+}
+
+.welcome-role-option {
+  background: var(--bg-page);
+  border: 1.5px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.welcome-role-option:hover {
+  background: var(--bg-warm);
+  border-color: var(--brand-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.welcome-role-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  background: #FFFFFF;
+  border: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  flex-shrink: 0;
+}
+
+.welcome-role-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 2px;
+}
+
+.welcome-role-text strong {
+  font-size: 0.92rem;
+  color: var(--brand-dark);
+}
+
+.welcome-role-text span {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+.welcome-role-arrow {
+  color: var(--brand-primary);
+  font-weight: 800;
+  font-size: 1rem;
+  transition: transform var(--transition);
+}
+
+.welcome-role-option:hover .welcome-role-arrow {
+  transform: translateX(3px);
+}
+
+.welcome-steps-strip {
+  margin-top: 24px;
+  padding: 14px 18px;
+  background: var(--bg-warm);
+  border: 1px solid var(--bg-warm-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.welcome-step-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.84rem;
+  color: var(--text-body);
+  text-align: left;
+}
+
+.welcome-step-item .step-num {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background: var(--brand-primary);
+  color: #FFFFFF;
+  font-weight: 800;
+  font-size: 0.76rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-header-info {
+  padding: 7px 13px;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+  .welcome-view-container {
+    margin: 2px auto 16px;
+  }
+
+  .welcome-hero-card {
+    padding: 22px 16px 20px;
+  }
+
+  .welcome-cta-group {
+    margin: 16px auto 20px;
+    gap: 12px;
+  }
+
+  .btn-welcome-main {
+    width: 100%;
+    justify-content: center;
+    padding: 13px 20px;
+    font-size: 0.96rem;
+  }
+
+  .welcome-role-cards {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .welcome-role-option {
+    padding: 12px 14px;
+  }
+
+  .welcome-steps-strip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    margin-top: 16px;
+  }
+
+  .btn-header-info .info-btn-text {
+    display: none;
+  }
+
+  .btn-header-info {
+    padding: 6px 10px;
+  }
+}

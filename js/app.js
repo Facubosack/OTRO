@@ -343,44 +343,54 @@ const App = {
   },
 
   updateRoleUI(role) {
-    // Header buttons
-    document.querySelectorAll('.role-btn').forEach(btn => {
-      if (btn.dataset.roleSwitch === role) {
-        btn.classList.add('active');
-      } else {
-        btn.classList.remove('active');
-      }
+    // Remove any legacy role switchers/callouts if still present in DOM
+    document.querySelectorAll('.role-toggle-group, #role-callout-banner').forEach(el => {
+      el.style.display = 'none';
     });
 
-    // Role callout message (compact & clean on the main app view)
-    const calloutContainer = document.getElementById('role-callout-banner');
-    if (calloutContainer) {
-      if (role === 'client') {
-        calloutContainer.innerHTML = `
-          <div class="role-callout-text">
-            <span>👤</span>
-            <div><strong>Modo Cliente:</strong> Publicá lo que necesitás o buscá especialistas.</div>
-          </div>
-          <span class="role-switch-link" data-role-switch="provider">Cambiar a Soy un "Otro" ➜</span>
-        `;
-      } else {
-        calloutContainer.innerHTML = `
-          <div class="role-callout-text">
-            <span>🧰</span>
-            <div><strong>Modo Prestador ("Otro"):</strong> Postulate a pedidos abiertos en tu zona.</div>
-          </div>
-          <span class="role-switch-link" data-role-switch="client">Cambiar a Modo Cliente ➜</span>
-        `;
-      }
+    const isProvider = role === 'provider';
 
-      // Re-bind click for newly rendered link
-      const link = calloutContainer.querySelector('.role-switch-link');
-      if (link) {
-        link.addEventListener('click', (e) => {
-          Storage.setRole(e.currentTarget.dataset.roleSwitch);
-        });
+    const headerPublishBtn = document.getElementById('header-publish-btn');
+    const mobilePublishBtn = document.getElementById('mobile-publish-btn');
+    const myTasksPublishBtn = document.getElementById('my-tasks-publish-btn');
+    const searchInput = document.getElementById('search-input');
+
+    const tabLabelFeed = document.getElementById('tab-label-feed');
+    const mobileTabLabelFeed = document.getElementById('mobile-tab-label-feed');
+    const tabLabelMyTasks = document.getElementById('tab-label-my-tasks');
+    const mobileTabLabelMyTasks = document.getElementById('mobile-tab-label-my-tasks');
+    const feedSectionTitle = document.getElementById('feed-section-title');
+    const myTasksSectionTitle = document.getElementById('my-tasks-section-title');
+
+    if (isProvider) {
+      if (headerPublishBtn) headerPublishBtn.style.display = 'none';
+      if (mobilePublishBtn) mobilePublishBtn.style.display = 'none';
+      if (myTasksPublishBtn) myTasksPublishBtn.style.display = 'none';
+      if (searchInput) {
+        searchInput.placeholder = 'Buscar trabajos disponibles por rubro, tarea o barrio...';
       }
+      if (tabLabelFeed) tabLabelFeed.textContent = 'Trabajos Disponibles';
+      if (mobileTabLabelFeed) mobileTabLabelFeed.textContent = 'Trabajos';
+      if (tabLabelMyTasks) tabLabelMyTasks.textContent = 'Mis Postulaciones';
+      if (mobileTabLabelMyTasks) mobileTabLabelMyTasks.textContent = 'Postulaciones';
+      if (feedSectionTitle) feedSectionTitle.innerHTML = '<span>🧰</span> Trabajos disponibles en tu zona';
+      if (myTasksSectionTitle) myTasksSectionTitle.innerHTML = '<span>📌</span> Mis postulaciones y trabajos';
+    } else {
+      if (headerPublishBtn) headerPublishBtn.style.display = '';
+      if (mobilePublishBtn) mobilePublishBtn.style.display = '';
+      if (myTasksPublishBtn) myTasksPublishBtn.style.display = '';
+      if (searchInput) {
+        searchInput.placeholder = '¿Qué necesitás resolver? Ej: pérdida de agua, colgar cortinas, pintar pieza, flete...';
+      }
+      if (tabLabelFeed) tabLabelFeed.textContent = 'Pedidos del Barrio';
+      if (mobileTabLabelFeed) mobileTabLabelFeed.textContent = 'Pedidos';
+      if (tabLabelMyTasks) tabLabelMyTasks.textContent = 'Mis Pedidos';
+      if (mobileTabLabelMyTasks) mobileTabLabelMyTasks.textContent = 'Mis Pedidos';
+      if (feedSectionTitle) feedSectionTitle.innerHTML = '<span>📌</span> Tareas y pedidos abiertos';
+      if (myTasksSectionTitle) myTasksSectionTitle.innerHTML = '<span>💼</span> Mis pedidos publicados';
     }
+
+    this.updateCounts();
   },
 
   renderCategoriesNav() {
@@ -463,13 +473,23 @@ const App = {
   updateCounts() {
     const tasks = Storage.getTasks();
     const openTasks = tasks.filter(t => t.status === 'open').length;
-    const userTasks = tasks.filter(t => t.clientName === 'Facundo M.').length;
+    const role = Storage.getRole();
+    const currentUser = (typeof Auth !== 'undefined' && Auth.currentUser) ? Auth.currentUser : null;
+
+    let myCount = 0;
+    if (currentUser) {
+      if (role === 'provider') {
+        myCount = tasks.filter(t => (t.bids || []).some(b => String(b.proId) === String(currentUser.uid))).length;
+      } else {
+        myCount = tasks.filter(t => t.authorId === currentUser.uid || t.clientName === currentUser.name).length;
+      }
+    }
 
     const feedBadge = document.getElementById('tab-feed-badge');
     const myTasksBadge = document.getElementById('tab-my-tasks-badge');
 
     if (feedBadge) feedBadge.textContent = openTasks;
-    if (myTasksBadge) myTasksBadge.textContent = userTasks;
+    if (myTasksBadge) myTasksBadge.textContent = myCount;
   },
 
   /* -------------------------------------------------------------
@@ -710,14 +730,15 @@ const App = {
     if (!container) return;
 
     const currentUser = (typeof Auth !== 'undefined' && Auth.currentUser) ? Auth.currentUser : null;
+    const role = Storage.getRole();
 
     if (!currentUser) {
       container.innerHTML = `
         <div class="empty-state-card" style="padding: 36px 20px;">
           <div class="empty-state-icon">🔒</div>
-          <h3 style="font-size: 1.15rem;">Iniciá sesión para ver tus pedidos</h3>
-          <p style="max-width: 420px; font-size: 0.88rem;">Conectate con tu cuenta de Google para dar seguimiento a tus publicaciones y ofertas de prestadores en tiempo real.</p>
-          <button class="btn-primary" onclick="Auth.openAuthModal('Iniciá sesión para ver tus pedidos')" style="margin-top: 10px;">
+          <h3 style="font-size: 1.15rem;">Iniciá sesión para ver tu actividad</h3>
+          <p style="max-width: 420px; font-size: 0.88rem;">Conectate con tu cuenta de Google para gestionar tus ${role === 'provider' ? 'postulaciones y clientes' : 'pedidos y presupuestos'} en tiempo real.</p>
+          <button class="btn-primary" onclick="Auth.openAuthModal('Iniciá sesión para continuar')" style="margin-top: 10px;">
             <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
             <span>Ingresar con Google</span>
           </button>
@@ -727,6 +748,71 @@ const App = {
     }
 
     const tasks = Storage.getTasks();
+
+    // MODO PRESTADOR ("OTRO"): Mostrar las tareas a las que se postuló
+    if (role === 'provider') {
+      const myBidTasks = tasks.filter(t =>
+        (t.bids || []).some(b => String(b.proId) === String(currentUser.uid))
+      );
+
+      if (myBidTasks.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state-card">
+            <div class="empty-state-icon">🧰</div>
+            <h3>Aún no te postulaste a ningún pedido</h3>
+            <p>Explorá los trabajos disponibles en tu zona y pasá tu presupuesto para empezar a conectar con vecinos.</p>
+            <button class="btn-primary" onclick="App.switchTab('feed')" style="margin-top: 10px;">
+              <span>📋</span> Ver trabajos disponibles
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = myBidTasks.map(task => {
+        const catObj = INITIAL_DATA.categories.find(c => c.id === task.category) || { name: 'Hogar', icon: '🏠' };
+        const myBid = (task.bids || []).find(b => String(b.proId) === String(currentUser.uid));
+        const isAccepted = myBid && myBid.status === 'accepted';
+        const clientFirstName = (task.clientName || 'Cliente').split(' ')[0];
+
+        return `
+          <div class="task-card" style="border-color: ${isAccepted ? 'var(--color-success)' : 'var(--border-light)'}">
+            <div class="task-card-header">
+              <span class="task-category-badge">${catObj.icon} ${catObj.name}</span>
+              <span class="urgency-badge ${isAccepted ? 'low' : 'medium'}" style="${isAccepted ? 'color: var(--color-success); font-weight: 700;' : ''}">
+                ${isAccepted ? '🎉 ¡Presupuesto Aceptado!' : '⏳ Oferta enviada'}
+              </span>
+            </div>
+
+            <h3 class="task-card-title">${this.escapeHTML(task.title)}</h3>
+            <p class="task-card-desc">${this.escapeHTML(task.description)}</p>
+
+            <div class="task-meta-list">
+              <div class="task-meta-row">
+                <span>👤 Cliente:</span>
+                <strong>${this.escapeHTML(task.clientName)} (${this.escapeHTML(task.location)})</strong>
+              </div>
+              <div class="task-meta-row">
+                <span>💰 Tu oferta enviada:</span>
+                <strong class="task-budget-highlight">${this.escapeHTML(myBid ? myBid.amount : '')}</strong>
+              </div>
+            </div>
+
+            <div class="task-card-footer">
+              <button class="btn-secondary" style="font-size: 0.78rem; padding: 6px 12px;" onclick="App.openTaskDetailModal('${task.id}')">
+                Ver pedido
+              </button>
+              <button class="task-action-btn view" onclick="App.openProChat('${task.authorId}', '${task.id}')">
+                💬 Chatear con ${this.escapeHTML(clientFirstName)}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      return;
+    }
+
+    // MODO CLIENTE: Mostrar sus pedidos publicados
     const myTasks = tasks.filter(t => 
       t.authorId === currentUser.uid ||
       t.clientName === currentUser.name ||
@@ -752,7 +838,7 @@ const App = {
     container.innerHTML = myTasks.map(task => {
       const catObj = INITIAL_DATA.categories.find(c => c.id === task.category) || { name: 'Hogar', icon: '🏠' };
       const bids = task.bids || [];
-      const hasAcceptedBid = bids.find(b => b.status === 'accepted');
+      const acceptedBid = bids.find(b => b.status === 'accepted');
 
       return `
         <div class="task-card" style="border-color: ${task.status === 'assigned' ? 'var(--color-success)' : 'var(--border-light)'}">
@@ -777,17 +863,26 @@ const App = {
             </div>
             <div class="task-meta-row">
               <span>📬 Ofertas recibidas:</span>
-              <strong style="color: var(--brand-primary);">${bids.length} profesionales se postularon</strong>
+              <strong style="color: var(--brand-primary);">${bids.length} ${bids.length === 1 ? 'profesional se postuló' : 'profesionales se postularon'}</strong>
             </div>
           </div>
 
           <div class="task-card-footer">
-            <button class="task-action-btn view" onclick="App.openTaskDetailModal('${task.id}')">
-              ${bids.length > 0 ? `Ver ${bids.length} ofertas ➜` : 'Ver detalles'}
-            </button>
-            <button class="btn-secondary" style="font-size: 0.78rem; padding: 6px 12px; color: var(--color-danger);" onclick="App.deleteUserTask('${task.id}')">
-              Eliminar
-            </button>
+            ${acceptedBid ? `
+              <button class="task-action-btn view" onclick="App.openProChat('${acceptedBid.proId}', '${task.id}')">
+                💬 Chatear con ${this.escapeHTML((acceptedBid.proName || 'Prestador').split(' ')[0])}
+              </button>
+              <button class="btn-secondary" style="font-size: 0.78rem; padding: 6px 12px;" onclick="App.openTaskDetailModal('${task.id}')">
+                Ver detalle
+              </button>
+            ` : `
+              <button class="task-action-btn view" onclick="App.openTaskDetailModal('${task.id}')">
+                ${bids.length > 0 ? `Ver ${bids.length} ofertas ➜` : 'Ver detalles'}
+              </button>
+              <button class="btn-secondary" style="font-size: 0.78rem; padding: 6px 12px; color: var(--color-danger);" onclick="App.deleteUserTask('${task.id}')">
+                Eliminar
+              </button>
+            `}
           </div>
         </div>
       `;

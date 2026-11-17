@@ -21,7 +21,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet -->
-  <link rel="stylesheet" href="./css/style.css?v=3.0">
+  <link rel="stylesheet" href="./css/style.css?v=3.1">
 </head>
 <body>
 
@@ -52,18 +52,8 @@
         </div>
 
         <div class="header-actions">
-          <!-- Segmented Role Switcher -->
-          <div class="role-toggle-group">
-            <button class="role-btn active" data-role-switch="client" title="Modo Cliente: Publicar y pedir ayuda">
-              <span>👤</span> Necesito ayuda
-            </button>
-            <button class="role-btn" data-role-switch="provider" title="Modo Prestador: Ver pedidos y ofrecer servicios">
-              <span>🧰</span> Soy un "Otro"
-            </button>
-          </div>
-
-          <!-- Publish Task Action Button -->
-          <button class="btn-primary" data-open-publish>
+          <!-- Publish Task Action Button (Client Mode) -->
+          <button id="header-publish-btn" class="btn-primary" data-open-publish>
             <span>➕</span>
             <span>Publicar Tarea</span>
           </button>
@@ -204,11 +194,6 @@
            ======================================================== -->
       <div id="app-main-view" class="app-main-view" style="display: none;">
 
-        <!-- Active Role Callout Banner (Compact) -->
-        <div id="role-callout-banner" class="role-callout">
-          <!-- Rendered dynamically by JS -->
-        </div>
-
         <!-- Search & Category Filters Bar -->
         <section class="search-filter-section">
           <div class="search-box-wrapper">
@@ -234,14 +219,14 @@
         <!-- Navigation Tabs Bar -->
         <nav class="nav-tabs-bar">
           <button class="tab-btn active" data-tab="feed">
-            <span>📋</span> Pedidos del Barrio
+            <span>📋</span> <span id="tab-label-feed">Pedidos del Barrio</span>
             <span id="tab-feed-badge" class="tab-badge">0</span>
           </button>
           <button class="tab-btn" data-tab="pros">
-            <span>👥</span> Especialistas ("Otros")
+            <span>👥</span> <span id="tab-label-pros">Especialistas ("Otros")</span>
           </button>
           <button class="tab-btn" data-tab="my-tasks">
-            <span>📌</span> Mis Pedidos
+            <span>📌</span> <span id="tab-label-my-tasks">Mis Pedidos</span>
             <span id="tab-my-tasks-badge" class="tab-badge">0</span>
           </button>
         </nav>
@@ -249,7 +234,7 @@
         <!-- VIEW 1: FEED OF TASKS / PEDIDOS -->
         <section id="tasks-feed-section">
           <div class="section-header-row">
-            <h2 class="section-title">
+            <h2 id="feed-section-title" class="section-title">
               <span>📌</span> Tareas y pedidos abiertos
             </h2>
             <div class="section-actions">
@@ -279,10 +264,10 @@
         <!-- VIEW 3: MY TASKS & ACTIVITY -->
         <section id="my-tasks-section" style="display: none;">
           <div class="section-header-row">
-            <h2 class="section-title">
+            <h2 id="my-tasks-section-title" class="section-title">
               <span>💼</span> Mis pedidos publicados
             </h2>
-            <button class="btn-primary" data-open-publish style="font-size: 0.82rem; padding: 6px 14px;">
+            <button id="my-tasks-publish-btn" class="btn-primary" data-open-publish style="font-size: 0.82rem; padding: 6px 14px;">
               <span>➕</span> Nuevo pedido
             </button>
           </div>
@@ -697,19 +682,19 @@
   <nav class="mobile-bottom-bar">
     <button class="nav-bottom-item active" data-tab="feed">
       <span class="icon">📋</span>
-      <span>Pedidos</span>
+      <span id="mobile-tab-label-feed">Pedidos</span>
     </button>
     <button class="nav-bottom-item" data-tab="pros">
       <span class="icon">👥</span>
       <span>Otros</span>
     </button>
-    <button class="nav-bottom-item" data-open-publish style="color: var(--brand-primary); font-weight: 700;">
+    <button id="mobile-publish-btn" class="nav-bottom-item" data-open-publish style="color: var(--brand-primary); font-weight: 700;">
       <span class="icon" style="font-size: 1.45rem; line-height: 1;">➕</span>
       <span>Publicar</span>
     </button>
     <button class="nav-bottom-item" data-tab="my-tasks">
       <span class="icon">📌</span>
-      <span>Mis Pedidos</span>
+      <span id="mobile-tab-label-my-tasks">Mis Pedidos</span>
     </button>
     <button id="nav-bottom-profile-btn" class="nav-bottom-item">
       <span class="icon">👤</span>
@@ -724,13 +709,13 @@
   <script src="./js/firebase-config.js"></script>
 
   <!-- Application Scripts -->
-  <script src="./js/geo.js?v=3.0"></script>
-  <script src="./js/data.js?v=3.0"></script>
-  <script src="./js/storage.js?v=3.0"></script>
-  <script src="./js/auth.js?v=3.0"></script>
-  <script src="./js/notifications.js?v=3.0"></script>
-  <script src="./js/chat.js?v=3.0"></script>
-  <script src="./js/pwa.js?v=3.0"></script>
-  <script src="./js/app.js?v=3.0"></script>
+  <script src="./js/geo.js?v=3.1"></script>
+  <script src="./js/data.js?v=3.1"></script>
+  <script src="./js/storage.js?v=3.1"></script>
+  <script src="./js/auth.js?v=3.1"></script>
+  <script src="./js/notifications.js?v=3.1"></script>
+  <script src="./js/chat.js?v=3.1"></script>
+  <script src="./js/pwa.js?v=3.1"></script>
+  <script src="./js/app.js?v=3.1"></script>
 </body>
 </html>

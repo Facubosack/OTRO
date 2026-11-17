@@ -251,14 +251,23 @@ const App = {
      NAVIGATION BETWEEN WELCOME PAGE & CLEAN MAIN APP VIEW
      ------------------------------------------------------------- */
   updateHeaderInfoButton() {
-    const headerInfoBtn = document.getElementById('header-info-btn');
-    if (!headerInfoBtn) return;
+    const helpBtn = document.getElementById('header-help-btn');
+    if (!helpBtn) return;
 
-    // Only show "¿Cómo funciona?" if the user is in the app view AND not logged in
-    if (this.currentView === 'app' && !this.isUserLoggedIn()) {
-      headerInfoBtn.style.display = 'inline-flex';
+    if (this.currentView === 'welcome') {
+      helpBtn.classList.add('active');
+      helpBtn.title = 'Volver a la pantalla principal';
     } else {
-      headerInfoBtn.style.display = 'none';
+      helpBtn.classList.remove('active');
+      helpBtn.title = '¿Cómo funciona OTRO?';
+    }
+  },
+
+  toggleWelcomeView() {
+    if (this.currentView === 'welcome') {
+      this.enterApp(this.activeTab || 'feed');
+    } else {
+      this.showWelcomeView(true, true);
     }
   },
 
@@ -284,9 +293,9 @@ const App = {
     }
   },
 
-  showWelcomeView(scroll = true) {
-    // If user is already logged in, keep them on the clean main screen
-    if (this.isUserLoggedIn()) {
+  showWelcomeView(scroll = true, force = false) {
+    // Only skip automatically on startup if user is logged in and didn't click '?'
+    if (!force && this.isUserLoggedIn()) {
       this.enterApp('feed', null, false);
       return;
     }

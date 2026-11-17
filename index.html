@@ -21,7 +21,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet -->
-  <link rel="stylesheet" href="./css/style.css?v=2.8">
+  <link rel="stylesheet" href="./css/style.css?v=2.9">
 </head>
 <body>
 
@@ -52,12 +52,6 @@
         </div>
 
         <div class="header-actions">
-          <!-- Button to view Welcome / Info page -->
-          <button id="header-info-btn" class="btn-secondary btn-header-info" onclick="App.showWelcomeView()" title="Ver cómo funciona OTRO" style="display: none;">
-            <span>ℹ️</span>
-            <span class="info-btn-text">¿Cómo funciona?</span>
-          </button>
-
           <!-- Segmented Role Switcher -->
           <div class="role-toggle-group">
             <button class="role-btn active" data-role-switch="client" title="Modo Cliente: Publicar y pedir ayuda">
@@ -72,6 +66,11 @@
           <button class="btn-primary" data-open-publish>
             <span>➕</span>
             <span>Publicar Tarea</span>
+          </button>
+
+          <!-- Help / Instructivo Button (?) -->
+          <button id="header-help-btn" class="header-help-btn" onclick="App.toggleWelcomeView()" title="¿Cómo funciona OTRO?">
+            <span>?</span>
           </button>
 
           <!-- Notification Bell -->

@@ -1,27 +1,34 @@
-const CACHE_NAME = 'otro-pwa-v16';
+const CACHE_NAME = 'otro-pwa-v17';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './css/style.css?v=2.9',
+  './css/style.css?v=3.0',
   './js/firebase-config.js',
-  './js/geo.js',
-  './js/data.js',
-  './js/storage.js',
-  './js/auth.js',
-  './js/notifications.js',
-  './js/chat.js',
-  './js/pwa.js',
-  './js/app.js',
+  './js/geo.js?v=3.0',
+  './js/data.js?v=3.0',
+  './js/storage.js?v=3.0',
+  './js/auth.js?v=3.0',
+  './js/notifications.js?v=3.0',
+  './js/chat.js?v=3.0',
+  './js/pwa.js?v=3.0',
+  './js/app.js?v=3.0',
   './manifest.json',
   './assets/logo.svg',
   './assets/logo.jpg'
 ];
 
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    }).then(() => self.skipWaiting())
+      return Promise.all(
+        ASSETS_TO_CACHE.map((url) =>
+          fetch(url, { cache: 'no-cache' }).then((res) => {
+            if (res.ok) return cache.put(url, res);
+          }).catch(() => {})
+        )
+      );
+    })
   );
 });
 
@@ -40,10 +47,10 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Network first, falling back to cache
+  // Network first (bypassing stale HTTP disk cache), falling back to SW cache offline
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, { cache: 'no-cache' })
       .then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
           const responseToCache = networkResponse.clone();

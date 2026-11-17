@@ -9,9 +9,29 @@ const App = {
   currentBiddingTaskId: null,
 
   init() {
+    this.ensureHelpButton();
     this.initInitialView();
     this.bindEvents();
     this.renderAll();
+  },
+
+  ensureHelpButton() {
+    // Remove old info button if still present in cached DOM
+    const oldInfoBtn = document.getElementById('header-info-btn');
+    if (oldInfoBtn) oldInfoBtn.remove();
+
+    if (!document.getElementById('header-help-btn')) {
+      const notifWrapper = document.querySelector('.header-notif-wrapper');
+      if (notifWrapper && notifWrapper.parentNode) {
+        const btn = document.createElement('button');
+        btn.id = 'header-help-btn';
+        btn.className = 'header-help-btn';
+        btn.title = '¿Cómo funciona OTRO?';
+        btn.innerHTML = '<span>?</span>';
+        btn.addEventListener('click', () => this.toggleWelcomeView());
+        notifWrapper.parentNode.insertBefore(btn, notifWrapper);
+      }
+    }
   },
 
   isUserLoggedIn() {

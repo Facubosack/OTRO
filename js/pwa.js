@@ -10,10 +10,19 @@ const PWA = {
 
   registerServiceWorker() {
     if ('serviceWorker' in navigator) {
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
+      });
+
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
+        navigator.serviceWorker.register('./sw.js?v=17', { updateViaCache: 'none' })
           .then((reg) => {
             console.log('OTRO Service Worker registrado con éxito:', reg.scope);
+            reg.update();
           })
           .catch((err) => {
             console.log('Service Worker no se pudo registrar:', err);

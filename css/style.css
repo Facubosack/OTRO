@@ -3112,3 +3112,30 @@ a {
     flex-direction: column;
   }
 }
+
+
+/* ========================================================
+   BARRA INFERIOR MÓVIL CENTRADA (MIS PEDIDOS | + | OTROS)
+   ======================================================== */
+@media (max-width: 768px) {
+  .mobile-bottom-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px calc(6px + env(safe-area-inset-bottom));
+  }
+
+  .mobile-bottom-bar .nav-bottom-item {
+    flex: 1;
+    font-size: 0.72rem;
+    padding: 4px 4px;
+    min-width: 0;
+  }
+
+  .mobile-bottom-bar .nav-bottom-item[data-open-publish] {
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+  }
+}

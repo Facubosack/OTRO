@@ -21,7 +21,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet -->
-  <link rel="stylesheet" href="./css/style.css?v=3.3">
+  <link rel="stylesheet" href="./css/style.css?v=3.4">
 </head>
 <body>
 
@@ -707,16 +707,12 @@
   </div>
 
   <!-- ========================================================
-       BARRA DE NAVEGACIÓN MÓVIL
+       BARRA DE NAVEGACIÓN MÓVIL (MIS PEDIDOS | + | OTROS)
        ======================================================== -->
   <nav class="mobile-bottom-bar">
     <button class="nav-bottom-item active" data-tab="feed">
       <span class="icon">📋</span>
       <span id="mobile-tab-label-feed">Mis Pedidos</span>
-    </button>
-    <button class="nav-bottom-item" data-tab="pros">
-      <span class="icon">👥</span>
-      <span>Otros</span>
     </button>
     <button id="mobile-publish-btn" class="nav-bottom-item" data-open-publish style="color: var(--brand-primary); font-weight: 700;">
       <span class="icon" style="font-size: 1.45rem; line-height: 1;">➕</span>
@@ -726,9 +722,9 @@
       <span class="icon">📌</span>
       <span id="mobile-tab-label-my-tasks">Postulaciones</span>
     </button>
-    <button id="nav-bottom-profile-btn" class="nav-bottom-item">
-      <span class="icon">👤</span>
-      <span>Perfil</span>
+    <button class="nav-bottom-item" data-tab="pros">
+      <span class="icon">👥</span>
+      <span>Otros</span>
     </button>
   </nav>
 
@@ -739,13 +735,13 @@
   <script src="./js/firebase-config.js"></script>
 
   <!-- Application Scripts -->
-  <script src="./js/geo.js?v=3.3"></script>
-  <script src="./js/data.js?v=3.3"></script>
-  <script src="./js/storage.js?v=3.3"></script>
-  <script src="./js/auth.js?v=3.3"></script>
-  <script src="./js/notifications.js?v=3.3"></script>
-  <script src="./js/chat.js?v=3.3"></script>
-  <script src="./js/pwa.js?v=3.3"></script>
-  <script src="./js/app.js?v=3.3"></script>
+  <script src="./js/geo.js?v=3.4"></script>
+  <script src="./js/data.js?v=3.4"></script>
+  <script src="./js/storage.js?v=3.4"></script>
+  <script src="./js/auth.js?v=3.4"></script>
+  <script src="./js/notifications.js?v=3.4"></script>
+  <script src="./js/chat.js?v=3.4"></script>
+  <script src="./js/pwa.js?v=3.4"></script>
+  <script src="./js/app.js?v=3.4"></script>
 </body>
 </html>

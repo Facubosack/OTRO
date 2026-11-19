@@ -2698,3 +2698,201 @@ a {
     padding: 6px 10px;
   }
 }
+
+
+/* ========================================================
+   VISTA CLIENTE: BOTÓN GRANDE CTA & FILTROS DE MIS PEDIDOS
+   ======================================================== */
+.client-hero-empty-card {
+  grid-column: 1 / -1;
+  background: #FFFFFF;
+  border: 1.5px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 52px 28px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--shadow-md);
+  max-width: 720px;
+  margin: 12px auto 24px;
+  width: 100%;
+}
+
+.client-hero-icon {
+  width: 68px;
+  height: 68px;
+  border-radius: var(--radius-full);
+  background: var(--bg-warm);
+  border: 1.5px solid var(--bg-warm-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  margin-bottom: 4px;
+}
+
+.client-hero-empty-card h2 {
+  font-size: 1.55rem;
+  color: var(--brand-dark);
+  line-height: 1.25;
+}
+
+.client-hero-empty-card p {
+  font-size: 0.96rem;
+  color: var(--text-muted);
+  max-width: 520px;
+  line-height: 1.55;
+  margin-bottom: 8px;
+}
+
+.btn-client-giant-cta {
+  font-size: 1.12rem;
+  padding: 16px 32px;
+  border-radius: var(--radius-full);
+  box-shadow: 0 8px 22px rgba(234, 88, 12, 0.32);
+  gap: 10px;
+}
+
+.btn-client-giant-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(234, 88, 12, 0.42);
+}
+
+/* Banner CTA superior cuando el cliente ya tiene pedidos */
+.client-top-cta-banner {
+  background: var(--bg-warm);
+  border: 1.5px solid var(--bg-warm-border);
+  border-radius: var(--radius-lg);
+  padding: 16px 22px;
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  cursor: pointer;
+  transition: all var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+.client-top-cta-banner:hover {
+  border-color: var(--brand-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.client-top-cta-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.client-top-cta-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: #FFFFFF;
+  border: 1px solid var(--bg-warm-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  flex-shrink: 0;
+}
+
+.client-top-cta-left strong {
+  display: block;
+  font-size: 1.05rem;
+  color: var(--brand-dark);
+}
+
+.client-top-cta-left span {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Filtros de estado de pedidos del cliente (Todos | Recibiendo ofertas | En curso) */
+.client-status-filters {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-subtle);
+  padding: 4px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-light);
+  flex-wrap: wrap;
+}
+
+.status-filter-pill {
+  background: none;
+  border: none;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.status-filter-pill:hover {
+  color: var(--brand-dark);
+}
+
+.status-filter-pill.active {
+  background: #FFFFFF;
+  color: var(--brand-primary);
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+
+@media (max-width: 768px) {
+  .client-hero-empty-card {
+    padding: 36px 18px;
+    margin: 6px auto 18px;
+  }
+
+  .client-hero-empty-card h2 {
+    font-size: 1.28rem;
+  }
+
+  .client-hero-empty-card p {
+    font-size: 0.88rem;
+  }
+
+  .btn-client-giant-cta {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.96rem;
+    padding: 15px 18px;
+  }
+
+  .client-top-cta-banner {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px 16px;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .client-top-cta-banner .btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .client-status-filters {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .status-filter-pill {
+    flex: 1;
+    text-align: center;
+    padding: 6px 8px;
+    font-size: 0.75rem;
+  }
+}

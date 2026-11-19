@@ -21,7 +21,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet -->
-  <link rel="stylesheet" href="./css/style.css?v=3.1">
+  <link rel="stylesheet" href="./css/style.css?v=3.2">
 </head>
 <body>
 
@@ -194,15 +194,30 @@
            ======================================================== -->
       <div id="app-main-view" class="app-main-view" style="display: none;">
 
-        <!-- Search & Category Filters Bar -->
-        <section class="search-filter-section">
+        <!-- Navigation Tabs Bar -->
+        <nav class="nav-tabs-bar">
+          <button class="tab-btn active" data-tab="feed">
+            <span>📋</span> <span id="tab-label-feed">Mis Pedidos</span>
+            <span id="tab-feed-badge" class="tab-badge">0</span>
+          </button>
+          <button class="tab-btn" data-tab="pros">
+            <span>👥</span> <span id="tab-label-pros">Especialistas ("Otros")</span>
+          </button>
+          <button id="tab-btn-my-tasks" class="tab-btn" data-tab="my-tasks" style="display: none;">
+            <span>📌</span> <span id="tab-label-my-tasks">Mis Postulaciones</span>
+            <span id="tab-my-tasks-badge" class="tab-badge">0</span>
+          </button>
+        </nav>
+
+        <!-- Search & Category Filters Bar (Shown for Pros Directory & Provider Job Feed) -->
+        <section id="search-filter-section" class="search-filter-section" style="display: none;">
           <div class="search-box-wrapper">
             <span class="search-icon">🔍</span>
             <input 
               type="text" 
               id="search-input" 
               class="search-input" 
-              placeholder="¿Qué necesitás resolver? Ej: pérdida de agua, colgar cortinas, pintar pieza, flete..." 
+              placeholder="Buscar por rubro, oficio o localidad..." 
               autocomplete="off"
             >
             <button id="search-clear" class="search-clear-btn" title="Limpiar búsqueda">✕</button>
@@ -216,29 +231,25 @@
           </div>
         </section>
 
-        <!-- Navigation Tabs Bar -->
-        <nav class="nav-tabs-bar">
-          <button class="tab-btn active" data-tab="feed">
-            <span>📋</span> <span id="tab-label-feed">Pedidos del Barrio</span>
-            <span id="tab-feed-badge" class="tab-badge">0</span>
-          </button>
-          <button class="tab-btn" data-tab="pros">
-            <span>👥</span> <span id="tab-label-pros">Especialistas ("Otros")</span>
-          </button>
-          <button class="tab-btn" data-tab="my-tasks">
-            <span>📌</span> <span id="tab-label-my-tasks">Mis Pedidos</span>
-            <span id="tab-my-tasks-badge" class="tab-badge">0</span>
-          </button>
-        </nav>
-
         <!-- VIEW 1: FEED OF TASKS / PEDIDOS -->
         <section id="tasks-feed-section">
-          <div class="section-header-row">
+          <!-- Big Hero CTA for Clients when they have tasks -->
+          <div id="client-top-cta-box" style="display: none;"></div>
+
+          <div id="feed-header-row" class="section-header-row">
             <h2 id="feed-section-title" class="section-title">
-              <span>📌</span> Tareas y pedidos abiertos
+              <span>📌</span> Mis pedidos
             </h2>
             <div class="section-actions">
-              <button id="btn-toggle-sort-geo" class="btn-secondary btn-sort-geo" style="font-size: 0.8rem; padding: 6px 12px;" title="Ordenar pedidos por cercanía a tu ubicación">
+              <!-- Client Status Filter Pills (All / Open / Assigned) -->
+              <div id="client-status-filters" class="client-status-filters" style="display: none;">
+                <button class="status-filter-pill active" data-client-filter="all">Todos</button>
+                <button class="status-filter-pill" data-client-filter="open">⏳ Recibiendo ofertas</button>
+                <button class="status-filter-pill" data-client-filter="assigned">✅ En curso</button>
+              </div>
+
+              <!-- Provider Geo Sort Button -->
+              <button id="btn-toggle-sort-geo" class="btn-secondary btn-sort-geo" style="font-size: 0.8rem; padding: 6px 12px; display: none;" title="Ordenar pedidos por cercanía a tu ubicación">
                 <span id="sort-geo-icon">📍</span>
                 <span id="sort-geo-text">Más cercanos</span>
               </button>
@@ -682,7 +693,7 @@
   <nav class="mobile-bottom-bar">
     <button class="nav-bottom-item active" data-tab="feed">
       <span class="icon">📋</span>
-      <span id="mobile-tab-label-feed">Pedidos</span>
+      <span id="mobile-tab-label-feed">Mis Pedidos</span>
     </button>
     <button class="nav-bottom-item" data-tab="pros">
       <span class="icon">👥</span>
@@ -692,9 +703,9 @@
       <span class="icon" style="font-size: 1.45rem; line-height: 1;">➕</span>
       <span>Publicar</span>
     </button>
-    <button class="nav-bottom-item" data-tab="my-tasks">
+    <button id="mobile-tab-btn-my-tasks" class="nav-bottom-item" data-tab="my-tasks" style="display: none;">
       <span class="icon">📌</span>
-      <span id="mobile-tab-label-my-tasks">Mis Pedidos</span>
+      <span id="mobile-tab-label-my-tasks">Postulaciones</span>
     </button>
     <button id="nav-bottom-profile-btn" class="nav-bottom-item">
       <span class="icon">👤</span>
@@ -709,13 +720,13 @@
   <script src="./js/firebase-config.js"></script>
 
   <!-- Application Scripts -->
-  <script src="./js/geo.js?v=3.1"></script>
-  <script src="./js/data.js?v=3.1"></script>
-  <script src="./js/storage.js?v=3.1"></script>
-  <script src="./js/auth.js?v=3.1"></script>
-  <script src="./js/notifications.js?v=3.1"></script>
-  <script src="./js/chat.js?v=3.1"></script>
-  <script src="./js/pwa.js?v=3.1"></script>
-  <script src="./js/app.js?v=3.1"></script>
+  <script src="./js/geo.js?v=3.2"></script>
+  <script src="./js/data.js?v=3.2"></script>
+  <script src="./js/storage.js?v=3.2"></script>
+  <script src="./js/auth.js?v=3.2"></script>
+  <script src="./js/notifications.js?v=3.2"></script>
+  <script src="./js/chat.js?v=3.2"></script>
+  <script src="./js/pwa.js?v=3.2"></script>
+  <script src="./js/app.js?v=3.2"></script>
 </body>
 </html>

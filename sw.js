@@ -1,17 +1,17 @@
-const CACHE_NAME = 'otro-pwa-v18';
+const CACHE_NAME = 'otro-pwa-v19';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './css/style.css?v=3.1',
+  './css/style.css?v=3.2',
   './js/firebase-config.js',
-  './js/geo.js?v=3.1',
-  './js/data.js?v=3.1',
-  './js/storage.js?v=3.1',
-  './js/auth.js?v=3.1',
-  './js/notifications.js?v=3.1',
-  './js/chat.js?v=3.1',
-  './js/pwa.js?v=3.1',
-  './js/app.js?v=3.1',
+  './js/geo.js?v=3.2',
+  './js/data.js?v=3.2',
+  './js/storage.js?v=3.2',
+  './js/auth.js?v=3.2',
+  './js/notifications.js?v=3.2',
+  './js/chat.js?v=3.2',
+  './js/pwa.js?v=3.2',
+  './js/app.js?v=3.2',
   './manifest.json',
   './assets/logo.svg',
   './assets/logo.jpg'

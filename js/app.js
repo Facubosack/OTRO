@@ -3,6 +3,7 @@ const App = {
   currentView: 'welcome', // 'welcome' | 'app'
   activeTab: 'feed', // 'feed' | 'pros' | 'my-tasks'
   activeCategory: 'all',
+  clientStatusFilter: 'all', // 'all' | 'open' | 'assigned'
   searchQuery: '',
   sortByProximity: false,
   currentViewingTaskId: null,
@@ -81,6 +82,17 @@ const App = {
         } else {
           this.switchTab(tab);
         }
+      });
+    });
+
+    // Client Status Filter Pills (All / Open / Assigned)
+    document.querySelectorAll('[data-client-filter]').forEach(pill => {
+      pill.addEventListener('click', (e) => {
+        this.clientStatusFilter = e.currentTarget.dataset.clientFilter || 'all';
+        document.querySelectorAll('[data-client-filter]').forEach(p => {
+          p.classList.toggle('active', p.dataset.clientFilter === this.clientStatusFilter);
+        });
+        this.renderTasksFeed();
       });
     });
 
@@ -357,15 +369,21 @@ const App = {
 
     const tabLabelFeed = document.getElementById('tab-label-feed');
     const mobileTabLabelFeed = document.getElementById('mobile-tab-label-feed');
+    const tabBtnMyTasks = document.getElementById('tab-btn-my-tasks');
+    const mobileTabBtnMyTasks = document.getElementById('mobile-tab-btn-my-tasks');
     const tabLabelMyTasks = document.getElementById('tab-label-my-tasks');
     const mobileTabLabelMyTasks = document.getElementById('mobile-tab-label-my-tasks');
     const feedSectionTitle = document.getElementById('feed-section-title');
     const myTasksSectionTitle = document.getElementById('my-tasks-section-title');
+    const sortGeoBtn = document.getElementById('btn-toggle-sort-geo');
 
     if (isProvider) {
       if (headerPublishBtn) headerPublishBtn.style.display = 'none';
       if (mobilePublishBtn) mobilePublishBtn.style.display = 'none';
       if (myTasksPublishBtn) myTasksPublishBtn.style.display = 'none';
+      if (tabBtnMyTasks) tabBtnMyTasks.style.display = '';
+      if (mobileTabBtnMyTasks) mobileTabBtnMyTasks.style.display = '';
+      if (sortGeoBtn) sortGeoBtn.style.display = '';
       if (searchInput) {
         searchInput.placeholder = 'Buscar trabajos disponibles por rubro, tarea o barrio...';
       }
@@ -376,18 +394,23 @@ const App = {
       if (feedSectionTitle) feedSectionTitle.innerHTML = '<span>🧰</span> Trabajos disponibles en tu zona';
       if (myTasksSectionTitle) myTasksSectionTitle.innerHTML = '<span>📌</span> Mis postulaciones y trabajos';
     } else {
+      // Client Mode: main tab ('feed') IS their own orders ("Mis Pedidos")
       if (headerPublishBtn) headerPublishBtn.style.display = '';
       if (mobilePublishBtn) mobilePublishBtn.style.display = '';
       if (myTasksPublishBtn) myTasksPublishBtn.style.display = '';
+      if (tabBtnMyTasks) tabBtnMyTasks.style.display = 'none';
+      if (mobileTabBtnMyTasks) mobileTabBtnMyTasks.style.display = 'none';
+      if (sortGeoBtn) sortGeoBtn.style.display = 'none';
       if (searchInput) {
-        searchInput.placeholder = '¿Qué necesitás resolver? Ej: pérdida de agua, colgar cortinas, pintar pieza, flete...';
+        searchInput.placeholder = 'Buscar especialista por nombre, oficio o barrio...';
       }
-      if (tabLabelFeed) tabLabelFeed.textContent = 'Pedidos del Barrio';
-      if (mobileTabLabelFeed) mobileTabLabelFeed.textContent = 'Pedidos';
-      if (tabLabelMyTasks) tabLabelMyTasks.textContent = 'Mis Pedidos';
-      if (mobileTabLabelMyTasks) mobileTabLabelMyTasks.textContent = 'Mis Pedidos';
-      if (feedSectionTitle) feedSectionTitle.innerHTML = '<span>📌</span> Tareas y pedidos abiertos';
-      if (myTasksSectionTitle) myTasksSectionTitle.innerHTML = '<span>💼</span> Mis pedidos publicados';
+      if (tabLabelFeed) tabLabelFeed.textContent = 'Mis Pedidos';
+      if (mobileTabLabelFeed) mobileTabLabelFeed.textContent = 'Mis Pedidos';
+      if (feedSectionTitle) feedSectionTitle.innerHTML = '<span>📌</span> Mis pedidos y servicios';
+
+      if (this.activeTab === 'my-tasks') {
+        this.activeTab = 'feed';
+      }
     }
 
     this.updateCounts();
@@ -438,6 +461,10 @@ const App = {
   },
 
   switchTab(tab) {
+    const role = Storage.getRole();
+    if (role !== 'provider' && tab === 'my-tasks') {
+      tab = 'feed';
+    }
     this.activeTab = tab;
 
     // Update tab bar buttons
@@ -456,10 +483,18 @@ const App = {
     const feedSection = document.getElementById('tasks-feed-section');
     const prosSection = document.getElementById('pros-directory-section');
     const myTasksSection = document.getElementById('my-tasks-section');
+    const searchFilterSection = document.getElementById('search-filter-section');
+    const role = Storage.getRole();
 
     if (feedSection) feedSection.style.display = this.activeTab === 'feed' ? 'block' : 'none';
     if (prosSection) prosSection.style.display = this.activeTab === 'pros' ? 'block' : 'none';
     if (myTasksSection) myTasksSection.style.display = this.activeTab === 'my-tasks' ? 'block' : 'none';
+
+    // Show search & category chips only on Pros Directory or Provider's Job Feed
+    if (searchFilterSection) {
+      const showSearch = this.activeTab === 'pros' || (role === 'provider' && this.activeTab === 'feed');
+      searchFilterSection.style.display = showSearch ? 'flex' : 'none';
+    }
 
     if (this.activeTab === 'feed') {
       this.renderTasksFeed();
@@ -476,31 +511,194 @@ const App = {
     const role = Storage.getRole();
     const currentUser = (typeof Auth !== 'undefined' && Auth.currentUser) ? Auth.currentUser : null;
 
-    let myCount = 0;
+    let myClientTasksCount = 0;
+    let myProviderBidsCount = 0;
+
     if (currentUser) {
-      if (role === 'provider') {
-        myCount = tasks.filter(t => (t.bids || []).some(b => String(b.proId) === String(currentUser.uid))).length;
-      } else {
-        myCount = tasks.filter(t => t.authorId === currentUser.uid || t.clientName === currentUser.name).length;
-      }
+      myClientTasksCount = tasks.filter(t => t.authorId === currentUser.uid || t.clientName === currentUser.name).length;
+      myProviderBidsCount = tasks.filter(t => (t.bids || []).some(b => String(b.proId) === String(currentUser.uid))).length;
     }
 
     const feedBadge = document.getElementById('tab-feed-badge');
     const myTasksBadge = document.getElementById('tab-my-tasks-badge');
 
-    if (feedBadge) feedBadge.textContent = openTasks;
-    if (myTasksBadge) myTasksBadge.textContent = myCount;
+    if (role === 'provider') {
+      if (feedBadge) feedBadge.textContent = openTasks;
+      if (myTasksBadge) myTasksBadge.textContent = myProviderBidsCount;
+    } else {
+      if (feedBadge) feedBadge.textContent = myClientTasksCount;
+      if (myTasksBadge) myTasksBadge.textContent = myClientTasksCount;
+    }
   },
 
   /* -------------------------------------------------------------
-     TASKS FEED
+     TASKS FEED (CLIENT: ONLY OWN ORDERS / PROVIDER: OPEN JOBS)
      ------------------------------------------------------------- */
   renderTasksFeed() {
     const container = document.getElementById('tasks-feed-grid');
     if (!container) return;
 
-    let tasks = Storage.getTasks();
+    const allTasks = Storage.getTasks();
     const role = Storage.getRole();
+    const currentUser = (typeof Auth !== 'undefined' && Auth.currentUser) ? Auth.currentUser : null;
+
+    const clientTopCtaBox = document.getElementById('client-top-cta-box');
+    const feedHeaderRow = document.getElementById('feed-header-row');
+    const clientStatusFilters = document.getElementById('client-status-filters');
+    const sortGeoBtn = document.getElementById('btn-toggle-sort-geo');
+
+    // =============================================================
+    // VISTA CLIENTE: SOLO SUS PROPIOS PEDIDOS + BOTÓN GRANDE CTA
+    // =============================================================
+    if (role !== 'provider') {
+      if (sortGeoBtn) sortGeoBtn.style.display = 'none';
+
+      const myAllTasks = currentUser
+        ? allTasks.filter(t => t.authorId === currentUser.uid || t.clientName === currentUser.name)
+        : [];
+
+      // Si el cliente aún no realizó ningún pedido: pantalla limpia con el botón grande protagonista
+      if (myAllTasks.length === 0) {
+        if (clientTopCtaBox) clientTopCtaBox.style.display = 'none';
+        if (feedHeaderRow) feedHeaderRow.style.display = 'none';
+
+        container.innerHTML = `
+          <div class="client-hero-empty-card">
+            <div class="client-hero-icon">🏡</div>
+            <h2>¿Tenés algo para reparar o resolver en casa?</h2>
+            <p>Publicá tu pedido en menos de un minuto, recibí presupuestos de especialistas de tu zona y coordiná por chat o WhatsApp.</p>
+            <button class="btn-primary btn-client-giant-cta" data-open-publish>
+              <span>✨</span> ¿Qué necesitás que haga OTRO en tu hogar?
+            </button>
+          </div>
+        `;
+        const btn = container.querySelector('[data-open-publish]');
+        if (btn) btn.addEventListener('click', () => this.openPublishModal());
+        return;
+      }
+
+      // Si el cliente YA tiene pedidos propios: mostramos el botón grande arriba + selector para distinguirlos
+      if (clientTopCtaBox) {
+        clientTopCtaBox.style.display = 'block';
+        clientTopCtaBox.innerHTML = `
+          <div class="client-top-cta-banner" onclick="App.openPublishModal()">
+            <div class="client-top-cta-left">
+              <span class="client-top-cta-icon">✨</span>
+              <div>
+                <strong>¿Qué necesitás que haga OTRO en tu hogar?</strong>
+                <span>Tocá acá para publicar un nuevo pedido y recibir presupuestos</span>
+              </div>
+            </div>
+            <button type="button" class="btn-primary">
+              <span>➕</span> Nuevo pedido
+            </button>
+          </div>
+        `;
+      }
+
+      if (feedHeaderRow) feedHeaderRow.style.display = 'flex';
+      if (clientStatusFilters) {
+        clientStatusFilters.style.display = 'flex';
+        const openCount = myAllTasks.filter(t => t.status !== 'assigned').length;
+        const assignedCount = myAllTasks.filter(t => t.status === 'assigned').length;
+
+        const btnAll = clientStatusFilters.querySelector('[data-client-filter="all"]');
+        const btnOpen = clientStatusFilters.querySelector('[data-client-filter="open"]');
+        const btnAssigned = clientStatusFilters.querySelector('[data-client-filter="assigned"]');
+
+        if (btnAll) btnAll.textContent = `Todos (${myAllTasks.length})`;
+        if (btnOpen) btnOpen.textContent = `⏳ Recibiendo ofertas (${openCount})`;
+        if (btnAssigned) btnAssigned.textContent = `✅ En curso (${assignedCount})`;
+      }
+
+      // Filtrar según lo que el cliente eligió ver
+      let filteredMyTasks = myAllTasks;
+      if (this.clientStatusFilter === 'open') {
+        filteredMyTasks = myAllTasks.filter(t => t.status !== 'assigned');
+      } else if (this.clientStatusFilter === 'assigned') {
+        filteredMyTasks = myAllTasks.filter(t => t.status === 'assigned');
+      }
+
+      if (filteredMyTasks.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state-card" style="padding: 36px 20px;">
+            <div class="empty-state-icon">${this.clientStatusFilter === 'assigned' ? '✅' : '⏳'}</div>
+            <h3 style="font-size: 1.1rem;">${this.clientStatusFilter === 'assigned' ? 'No tenés pedidos en curso en este momento' : 'No tenés pedidos pendientes de oferta'}</h3>
+            <p style="font-size: 0.86rem;">Podés cambiar el filtro arriba para ver todos tus pedidos.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filteredMyTasks.map(task => {
+        const catObj = INITIAL_DATA.categories.find(c => c.id === task.category) || { name: 'Hogar', icon: '🏠' };
+        const bids = task.bids || [];
+        const acceptedBid = bids.find(b => b.status === 'accepted');
+        const isAssigned = task.status === 'assigned' || !!acceptedBid;
+
+        return `
+          <div class="task-card" style="border-color: ${isAssigned ? 'var(--color-success)' : 'var(--border-light)'}">
+            <div class="task-card-header">
+              <span class="task-category-badge">${catObj.icon} ${catObj.name}</span>
+              <span class="urgency-badge ${isAssigned ? 'low' : 'medium'}" style="${isAssigned ? 'color: var(--color-success); font-weight: 700;' : ''}">
+                ${isAssigned ? '✅ En curso / Asignado' : '⏳ Recibiendo ofertas'}
+              </span>
+            </div>
+
+            <h3 class="task-card-title">${this.escapeHTML(task.title)}</h3>
+            <p class="task-card-desc">${this.escapeHTML(task.description)}</p>
+
+            <div class="task-meta-list">
+              <div class="task-meta-row">
+                <span>📍 Zona:</span>
+                <strong>${this.escapeHTML(task.location)}</strong>
+              </div>
+              <div class="task-meta-row">
+                <span>💰 Presupuesto estimado:</span>
+                <strong class="task-budget-highlight">${this.escapeHTML(task.budget)}</strong>
+              </div>
+              <div class="task-meta-row">
+                <span>${isAssigned ? '🧰 Prestador asignado:' : '📬 Ofertas recibidas:'}</span>
+                <strong style="color: ${isAssigned ? 'var(--color-success)' : 'var(--brand-primary)'};">
+                  ${isAssigned && acceptedBid
+                    ? `${this.escapeHTML(acceptedBid.proName)} (${this.escapeHTML(acceptedBid.amount)})`
+                    : `${bids.length} ${bids.length === 1 ? 'profesional se postuló' : 'profesionales se postularon'}`}
+                </strong>
+              </div>
+            </div>
+
+            <div class="task-card-footer">
+              ${isAssigned && acceptedBid ? `
+                <button class="task-action-btn view" onclick="App.openProChat('${acceptedBid.proId}', '${task.id}')">
+                  💬 Chatear con ${this.escapeHTML((acceptedBid.proName || 'Prestador').split(' ')[0])}
+                </button>
+                <button class="btn-secondary" style="font-size: 0.78rem; padding: 6px 12px;" onclick="App.openTaskDetailModal('${task.id}')">
+                  Ver detalle
+                </button>
+              ` : `
+                <button class="task-action-btn view" onclick="App.openTaskDetailModal('${task.id}')">
+                  ${bids.length > 0 ? `Ver ${bids.length} ${bids.length === 1 ? 'oferta' : 'ofertas'} ➜` : 'Ver detalles'}
+                </button>
+                <button class="btn-secondary" style="font-size: 0.78rem; padding: 6px 12px; color: var(--color-danger);" onclick="App.deleteUserTask('${task.id}')">
+                  Eliminar
+                </button>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+      return;
+    }
+
+    // =============================================================
+    // VISTA PRESTADOR ("OTRO"): TRABAJOS DISPONIBLES EN LA ZONA
+    // =============================================================
+    if (clientTopCtaBox) clientTopCtaBox.style.display = 'none';
+    if (clientStatusFilters) clientStatusFilters.style.display = 'none';
+    if (feedHeaderRow) feedHeaderRow.style.display = 'flex';
+    if (sortGeoBtn) sortGeoBtn.style.display = '';
+
+    let tasks = allTasks;
 
     // Filter by Category
     if (this.activeCategory !== 'all') {
@@ -520,16 +718,11 @@ const App = {
       const isFiltered = this.activeCategory !== 'all' || this.searchQuery;
       container.innerHTML = `
         <div class="empty-state-card" style="padding: 44px 20px;">
-          <div class="empty-state-icon">${isFiltered ? '🔍' : '🏡'}</div>
-          <h3 style="font-size: 1.15rem;">${isFiltered ? 'No se encontraron pedidos con este filtro' : 'Aún no hay pedidos publicados en el muro'}</h3>
-          <p style="max-width: 440px; font-size: 0.88rem;">${isFiltered ? 'Probá seleccionando "Todos los Rubros" o limpiando el buscador.' : '¿Necesitás una reparación, pintura o ayuda en tu casa? Publicá el primer pedido y recibí presupuestos en minutos.'}</p>
-          <button class="btn-primary" data-open-publish style="margin-top: 10px;">
-            <span>➕</span> Publicar el primer pedido
-          </button>
+          <div class="empty-state-icon">${isFiltered ? '🔍' : '🧰'}</div>
+          <h3 style="font-size: 1.15rem;">${isFiltered ? 'No se encontraron trabajos con este filtro' : 'No hay pedidos abiertos en este momento'}</h3>
+          <p style="max-width: 440px; font-size: 0.88rem;">${isFiltered ? 'Probá seleccionando "Todos los Rubros" o limpiando el buscador.' : 'Apenas un vecino de tu zona publique un pedido en tu rubro, te avisaremos con una notificación.'}</p>
         </div>
       `;
-      const btn = container.querySelector('[data-open-publish]');
-      if (btn) btn.addEventListener('click', () => this.openPublishModal());
       return;
     }
 
@@ -556,14 +749,13 @@ const App = {
         }
       }
 
+      const myBid = currentUser && (task.bids || []).find(b => String(b.proId) === String(currentUser.uid));
+
       return `
         <div class="task-card" data-task-id="${task.id}">
           <div class="task-card-header">
             <span class="task-category-badge">${catObj.icon} ${catObj.name}</span>
             ${distanceBadgeHtml}
-            ${(typeof Auth !== 'undefined' && Auth.currentUser && (task.authorId === Auth.currentUser.uid || task.clientName === Auth.currentUser.name)) ? `
-              <span class="task-category-badge" style="background: var(--bg-warm); color: var(--brand-primary); font-weight: 700; border-color: var(--bg-warm-border);">👤 Tu pedido</span>
-            ` : ''}
             <span class="urgency-badge ${urgencyClass}">⏱️ ${task.urgency}</span>
           </div>
 
@@ -590,43 +782,20 @@ const App = {
               <span>💬 ${bidsCount} ${bidsCount === 1 ? 'oferta' : 'ofertas'}</span>
             </div>
 
-            ${(() => {
-              const currUser = (typeof Auth !== 'undefined' && Auth.currentUser) ? Auth.currentUser : null;
-              const isOwn = currUser && (task.authorId === currUser.uid || task.clientName === currUser.name);
-              const myBid = currUser && (task.bids || []).find(b => b.proId === currUser.uid);
-
-              if (isOwn) {
-                return `
-                  <button class="task-action-btn view" onclick="App.openTaskDetailModal('${task.id}')">
-                    Ver Detalles / Ofertas ➜
-                  </button>
-                `;
-              }
-              if (role === 'provider') {
-                if (myBid) {
-                  return `
-                    <button class="task-action-btn view" onclick="App.openTaskDetailModal('${task.id}')">
-                      ${myBid.status === 'accepted' ? '🎉 Match · Chatear con Cliente' : '💬 Ver mi oferta / Chat'}
-                    </button>
-                  `;
-                }
-                return `
-                  <div style="display: flex; gap: 6px;">
-                    <button class="btn-secondary" style="font-size: 0.78rem; padding: 6px 10px;" onclick="App.openTaskDetailModal('${task.id}')">
-                      Ver
-                    </button>
-                    <button class="task-action-btn bid" onclick="App.openBidModal('${task.id}')">
-                      ⚡ Postularme
-                    </button>
-                  </div>
-                `;
-              }
-              return `
-                <button class="task-action-btn view" onclick="App.openTaskDetailModal('${task.id}')">
-                  Ver Detalles / Ofertas ➜
+            ${myBid ? `
+              <button class="task-action-btn view" onclick="App.openTaskDetailModal('${task.id}')">
+                ${myBid.status === 'accepted' ? '🎉 Match · Chatear con Cliente' : '💬 Ver mi oferta / Chat'}
+              </button>
+            ` : `
+              <div style="display: flex; gap: 6px;">
+                <button class="btn-secondary" style="font-size: 0.78rem; padding: 6px 10px;" onclick="App.openTaskDetailModal('${task.id}')">
+                  Ver
                 </button>
-              `;
-            })()}
+                <button class="task-action-btn bid" onclick="App.openBidModal('${task.id}')">
+                  ⚡ Postularme
+                </button>
+              </div>
+            `}
           </div>
         </div>
       `;

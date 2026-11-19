@@ -842,33 +842,38 @@ const App = {
     }
 
     container.innerHTML = pros.map(pro => {
-      const skillsHtml = (pro.skills || []).map(s => `<span class="skill-chip">${s}</span>`).join('');
+      const skillsHtml = (pro.skills || []).map(s => `<span class="skill-chip">${this.escapeHTML(s)}</span>`).join('');
+      const latestWork = (pro.completedWorks && pro.completedWorks.length > 0) ? pro.completedWorks[0] : null;
+      const latestReview = (pro.reviews && pro.reviews.length > 0) ? pro.reviews[0] : null;
 
       return `
         <div class="pro-card" data-pro-id="${pro.id}">
-          <div class="pro-header-row">
+          <div class="pro-header-row" onclick="App.openProProfileModal('${pro.id}')" style="cursor: pointer;">
             <div class="pro-avatar" style="background: ${pro.avatarColor}">
               ${pro.avatarPhoto ? `<img src="${pro.avatarPhoto}" alt="${this.escapeHTML(pro.name)}">` : pro.avatarInitials}
             </div>
             <div class="pro-info">
               <div class="pro-name-row">
                 <span class="pro-name">${this.escapeHTML(pro.name)}</span>
-                <span class="verified-badge-icon" title="Verificado con DNI y Antecedentes">✓</span>
+                <span class="verified-badge-icon" title="Verificado en OTRO">✓</span>
               </div>
               <div class="pro-title-line">${this.escapeHTML(pro.title)}</div>
-              <span class="pro-badge-tag">${pro.badge}</span>
+              <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 3px;">
+                <span class="pro-badge-tag">${this.escapeHTML(pro.badge)}</span>
+                <span style="font-size: 0.73rem; color: var(--text-muted);">📍 ${this.escapeHTML(pro.zone || 'CABA')}</span>
+              </div>
             </div>
           </div>
 
           <div class="pro-stats-strip">
             <div class="pro-rating-stars">
-              ★ ${pro.rating.toFixed(1)} <span class="pro-rating-count">(${pro.reviewsCount})</span>
+              ★ ${pro.rating.toFixed(1)} <span class="pro-rating-count">(${pro.reviewsCount} reseñas)</span>
             </div>
             <div class="pro-jobs-count">
-              <strong>${pro.jobsCompleted}</strong> trabajos
+              🛠️ <strong>${pro.jobsCompleted}</strong> hechos
             </div>
             <div class="pro-rate-tag">
-              ${pro.hourlyRate}
+              ${this.escapeHTML(pro.hourlyRate)}
             </div>
           </div>
 
@@ -878,17 +883,192 @@ const App = {
             ${skillsHtml}
           </div>
 
+          ${latestWork ? `
+            <div class="pro-card-work-preview" onclick="App.openProProfileModal('${pro.id}')">
+              <span class="work-preview-label">🛠️ Trabajo reciente:</span>
+              <strong>${this.escapeHTML(latestWork.title)}</strong>
+              <span class="work-preview-zone">(${this.escapeHTML(latestWork.zone)})</span>
+            </div>
+          ` : ''}
+
+          ${latestReview ? `
+            <div class="pro-card-review-preview" onclick="App.openProProfileModal('${pro.id}')">
+              <div class="review-preview-quote">"${this.escapeHTML(latestReview.comment)}"</div>
+              <div class="review-preview-author">
+                <span>⭐ ${'★'.repeat(latestReview.rating || 5)}</span>
+                <span>— <strong>${this.escapeHTML(latestReview.author)}</strong> (${this.escapeHTML(latestReview.zone)})</span>
+              </div>
+            </div>
+          ` : ''}
+
           <div class="pro-card-actions">
-            <button class="btn-contact-wa" onclick="App.openProWhatsApp('${pro.id}')">
-              <span>💬</span> WhatsApp
+            <button class="btn-secondary btn-view-pro-profile" onclick="App.openProProfileModal('${pro.id}')">
+              <span>👁️</span> Ver Perfil y Trabajos
             </button>
             <button class="btn-chat-in-app" onclick="App.openProChat('${pro.id}')">
-              <span>✉️</span> Chat OTRO
+              <span>💬</span> Chat
+            </button>
+            <button class="btn-contact-wa" onclick="App.openProWhatsApp('${pro.id}')" title="Contactar por WhatsApp">
+              <span>📲</span> WA
             </button>
           </div>
         </div>
       `;
     }).join('');
+  },
+
+  openProProfileModal(proId) {
+    const pro = Storage.getProById(proId);
+    if (!pro) return;
+
+    const modal = document.getElementById('pro-profile-modal');
+    const titleEl = document.getElementById('pro-modal-header-title');
+    const bodyEl = document.getElementById('pro-profile-modal-body');
+    if (!modal || !bodyEl) return;
+
+    if (titleEl) titleEl.textContent = `Perfil de ${pro.name}`;
+
+    const skillsHtml = (pro.skills || []).map(s => `<span class="skill-chip">${this.escapeHTML(s)}</span>`).join('');
+    const works = pro.completedWorks || [];
+    const reviews = pro.reviews || [];
+
+    const worksHtml = works.length > 0
+      ? works.map(w => `
+          <div class="pro-work-item">
+            <div class="pro-work-item-top">
+              <strong>✅ ${this.escapeHTML(w.title)}</strong>
+              <span class="pro-work-meta">📍 ${this.escapeHTML(w.zone)} · ${this.escapeHTML(w.date || 'Finalizado')}</span>
+            </div>
+            <p>${this.escapeHTML(w.detail)}</p>
+          </div>
+        `).join('')
+      : `<p style="font-size: 0.85rem; color: var(--text-muted); padding: 10px 0;">Este especialista aún no cargó fotos o detalle de trabajos anteriores.</p>`;
+
+    const reviewsHtml = reviews.length > 0
+      ? reviews.map(r => `
+          <div class="pro-review-item">
+            <div class="pro-review-top">
+              <div>
+                <strong>👤 ${this.escapeHTML(r.author)}</strong>
+                <span class="pro-review-zone">(${this.escapeHTML(r.zone)})</span>
+              </div>
+              <div class="pro-review-stars">
+                ${'★'.repeat(Number(r.rating) || 5)} <span class="pro-review-date">${this.escapeHTML(r.date || '')}</span>
+              </div>
+            </div>
+            <p class="pro-review-comment">"${this.escapeHTML(r.comment)}"</p>
+          </div>
+        `).join('')
+      : `<p style="font-size: 0.85rem; color: var(--text-muted); padding: 10px 0;">Sé el primero en dejar una recomendación para ${this.escapeHTML(pro.name)}.</p>`;
+
+    bodyEl.innerHTML = `
+      <div class="pro-modal-hero">
+        <div class="pro-avatar pro-modal-avatar" style="background: ${pro.avatarColor}">
+          ${pro.avatarPhoto ? `<img src="${pro.avatarPhoto}" alt="${this.escapeHTML(pro.name)}">` : pro.avatarInitials}
+        </div>
+        <div class="pro-modal-hero-info">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <h3 style="font-size: 1.25rem;">${this.escapeHTML(pro.name)}</h3>
+            <span class="pro-badge-tag">${this.escapeHTML(pro.badge)}</span>
+          </div>
+          <div style="font-size: 0.9rem; font-weight: 600; color: var(--brand-primary); margin-top: 2px;">
+            ${this.escapeHTML(pro.title)}
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
+            📍 Zonas de atención: <strong>${this.escapeHTML(pro.zone || 'CABA')}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="pro-stats-strip" style="margin-bottom: 14px;">
+        <div class="pro-rating-stars">
+          ★ ${pro.rating.toFixed(1)} <span class="pro-rating-count">(${pro.reviewsCount} opiniones)</span>
+        </div>
+        <div class="pro-jobs-count">
+          🛠️ <strong>${pro.jobsCompleted}</strong> trabajos realizados
+        </div>
+        <div class="pro-rate-tag">
+          ${this.escapeHTML(pro.hourlyRate)}
+        </div>
+      </div>
+
+      <p style="font-size: 0.9rem; color: var(--text-body); line-height: 1.55; margin-bottom: 12px;">
+        ${this.escapeHTML(pro.bio)}
+      </p>
+
+      <div class="pro-skills-chips" style="margin-bottom: 18px;">
+        ${skillsHtml}
+      </div>
+
+      <!-- SECCIÓN 1: TRABAJOS YA REALIZADOS -->
+      <div class="pro-modal-section">
+        <h4 class="pro-modal-section-title">
+          <span>🛠️</span> Trabajos realizados recientemente (${works.length})
+        </h4>
+        <div class="pro-works-list">
+          ${worksHtml}
+        </div>
+      </div>
+
+      <!-- SECCIÓN 2: COMENTARIOS Y RECOMENDACIONES DE VECINOS -->
+      <div class="pro-modal-section">
+        <h4 class="pro-modal-section-title">
+          <span>⭐</span> Comentarios de vecinos (${reviews.length})
+        </h4>
+        <div class="pro-reviews-list">
+          ${reviewsHtml}
+        </div>
+
+        <!-- Formulario para agregar una recomendación real -->
+        <form class="pro-add-review-form" onsubmit="App.handleAddProReview(event, '${pro.id}')">
+          <div style="font-size: 0.82rem; font-weight: 700; color: var(--brand-dark); margin-bottom: 6px;">
+            ✍️ ¿Ya trabajaste con ${this.escapeHTML(pro.name.split(' ')[0])}? Dejale tu comentario:
+          </div>
+          <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+            <select id="new-review-rating" class="form-select" style="width: 140px; padding: 7px 10px; font-size: 0.82rem;">
+              <option value="5" selected>★★★★★ (5)</option>
+              <option value="4">★★★★☆ (4)</option>
+              <option value="3">★★★☆☆ (3)</option>
+            </select>
+            <input type="text" id="new-review-comment" class="form-input" placeholder="Contá qué trabajo hizo y cómo resultó..." required style="flex: 1; padding: 7px 12px; font-size: 0.84rem;">
+            <button type="submit" class="btn-primary" style="padding: 7px 14px; font-size: 0.8rem;">Publicar</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ACCIONES DE CONTACTO DIRECTO -->
+      <div class="pro-modal-footer-actions">
+        <button class="btn-chat-in-app" style="flex: 1; justify-content: center; padding: 11px 16px; font-size: 0.92rem;" onclick="App.closeModal(document.getElementById('pro-profile-modal')); App.openProChat('${pro.id}')">
+          <span>💬</span> Chatear con ${this.escapeHTML(pro.name.split(' ')[0])}
+        </button>
+        <button class="btn-contact-wa" style="flex: 1; justify-content: center; padding: 11px 16px; font-size: 0.92rem;" onclick="App.openProWhatsApp('${pro.id}')">
+          <span>📲</span> Contactar por WhatsApp
+        </button>
+      </div>
+    `;
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  },
+
+  async handleAddProReview(e, proId) {
+    e.preventDefault();
+    const commentInput = document.getElementById('new-review-comment');
+    const ratingSelect = document.getElementById('new-review-rating');
+    if (!commentInput || !commentInput.value.trim()) return;
+
+    const currentUser = (typeof Auth !== 'undefined' && Auth.currentUser) ? Auth.currentUser : Storage.getUser();
+
+    await Storage.addProReview(proId, {
+      author: currentUser.name || 'Vecino de OTRO',
+      zone: currentUser.zone || 'CABA',
+      rating: ratingSelect ? Number(ratingSelect.value) : 5,
+      comment: commentInput.value.trim()
+    });
+
+    this.showToast('¡Gracias por dejar tu recomendación!', '⭐');
+    this.openProProfileModal(proId);
+    this.renderProsDirectory();
   },
 
   /* -------------------------------------------------------------

@@ -181,15 +181,20 @@ const Storage = {
             const name = u.name || 'Prestador';
             const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
 
+            const userReviews = Array.isArray(u.reviews) ? u.reviews : [];
+            const avgRating = userReviews.length > 0
+              ? userReviews.reduce((acc, r) => acc + (Number(r.rating) || 5), 0) / userReviews.length
+              : (Number(u.rating) || 5.0);
+
             realPros.push({
               id: doc.id,
               name,
               title: u.bio ? (u.bio.length > 55 ? u.bio.substring(0, 55) + '...' : u.bio) : 'Prestador de Oficio Verificado',
               category: primaryCategory,
-              badge: 'Vecino Verificado',
-              rating: 5.0,
-              reviewsCount: 0,
-              jobsCompleted: 0,
+              badge: userReviews.length >= 3 ? '🏆 Muy Recomendado' : '✓ Vecino Verificado',
+              rating: avgRating,
+              reviewsCount: userReviews.length,
+              jobsCompleted: Number(u.jobsCompleted) || userReviews.length || 0,
               hourlyRate: u.hourlyRate || 'A convenir',
               zone: u.zone || 'CABA',
               phone: u.phone ? u.phone.replace(/[^0-9]/g, '') : '',
@@ -198,6 +203,8 @@ const Storage = {
               avatarInitials: initials,
               bio: u.bio || 'Especialista en servicios del hogar.',
               skills: trades.map(t => tradeLabels[t] || t),
+              completedWorks: Array.isArray(u.completedWorks) ? u.completedWorks : [],
+              reviews: userReviews,
               whatsappText: `Hola ${name}, te contacto desde la app OTRO para consultar por un trabajo en mi hogar.`
             });
           });
@@ -428,13 +435,107 @@ const Storage = {
   },
 
   // Pros Management
+  getLocalProReviewsMap() {
+    try {
+      return JSON.parse(localStorage.getItem('otro_pro_reviews_v1')) || {};
+    } catch (e) {
+      return {};
+    }
+  },
+
   getPros() {
-    return this._prosCache || [];
+    const realPros = this._prosCache || [];
+    const featuredPros = (typeof INITIAL_DATA !== 'undefined' && Array.isArray(INITIAL_DATA.pros))
+      ? INITIAL_DATA.pros
+      : [];
+    const extraReviewsMap = this.getLocalProReviewsMap();
+    const allTasks = this.getTasks();
+
+    // Combine real Firestore providers + featured top-rated providers without duplicate IDs
+    const map = new Map();
+    [...realPros, ...featuredPros].forEach(pro => {
+      const extraReviews = extraReviewsMap[pro.id] || [];
+      const baseReviews = Array.isArray(pro.reviews) ? pro.reviews : [];
+      const mergedReviews = [...extraReviews, ...baseReviews];
+
+      // Include any real assigned tasks from the platform in completedWorks
+      const realAssignedTasks = allTasks
+        .filter(t => t.assignedPro && String(t.assignedPro.id) === String(pro.id))
+        .map(t => ({
+          title: t.title,
+          zone: t.location || pro.zone,
+          date: t.createdAt || 'Reciente',
+          detail: t.description || 'Trabajo coordinado a través de OTRO.'
+        }));
+
+      const baseWorks = Array.isArray(pro.completedWorks) ? pro.completedWorks : [];
+      const mergedWorks = [...realAssignedTasks, ...baseWorks];
+
+      const totalReviews = Math.max(pro.reviewsCount || 0, mergedReviews.length);
+      const totalJobs = Math.max(pro.jobsCompleted || 0, mergedWorks.length);
+
+      let rating = pro.rating || 5.0;
+      if (extraReviews.length > 0 && mergedReviews.length > 0) {
+        rating = mergedReviews.reduce((acc, r) => acc + (Number(r.rating) || 5), 0) / mergedReviews.length;
+      }
+
+      map.set(pro.id, {
+        ...pro,
+        rating,
+        reviewsCount: totalReviews,
+        jobsCompleted: totalJobs,
+        completedWorks: mergedWorks,
+        reviews: mergedReviews
+      });
+    });
+
+    const combined = Array.from(map.values());
+    // Sort best rated & most experienced first
+    combined.sort((a, b) => {
+      if (b.rating !== a.rating) return b.rating - a.rating;
+      return (b.jobsCompleted || 0) - (a.jobsCompleted || 0);
+    });
+    return combined;
   },
 
   getProById(id) {
     const pros = this.getPros();
     return pros.find(p => p.id === id);
+  },
+
+  async addProReview(proId, reviewData) {
+    const review = {
+      author: reviewData.author || 'Vecino',
+      zone: reviewData.zone || 'CABA',
+      rating: Number(reviewData.rating) || 5,
+      date: 'Hoy',
+      comment: reviewData.comment || ''
+    };
+
+    // Save locally
+    const map = this.getLocalProReviewsMap();
+    if (!map[proId]) map[proId] = [];
+    map[proId].unshift(review);
+    localStorage.setItem('otro_pro_reviews_v1', JSON.stringify(map));
+
+    // Also sync to Firestore if it's a real user doc
+    if (typeof isFirebaseReady !== 'undefined' && isFirebaseReady && db && !String(proId).startsWith('pro-destacado-')) {
+      try {
+        const docRef = db.collection('users').doc(String(proId));
+        const snap = await docRef.get();
+        if (snap.exists) {
+          const uData = snap.data();
+          const currentReviews = Array.isArray(uData.reviews) ? uData.reviews : [];
+          currentReviews.unshift(review);
+          await docRef.update({ reviews: currentReviews });
+        }
+      } catch (e) {
+        console.warn("No se pudo guardar reseña en Firestore:", e);
+      }
+    }
+
+    window.dispatchEvent(new CustomEvent('prosUpdated'));
+    return review;
   },
 
   // Chats

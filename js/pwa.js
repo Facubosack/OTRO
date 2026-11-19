@@ -19,7 +19,7 @@ const PWA = {
       });
 
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=19', { updateViaCache: 'none' })
+        navigator.serviceWorker.register('./sw.js?v=20', { updateViaCache: 'none' })
           .then((reg) => {
             console.log('OTRO Service Worker registrado con éxito:', reg.scope);
             reg.update();

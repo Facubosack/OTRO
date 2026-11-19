@@ -21,7 +21,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Main Stylesheet -->
-  <link rel="stylesheet" href="./css/style.css?v=3.2">
+  <link rel="stylesheet" href="./css/style.css?v=3.3">
 </head>
 <body>
 
@@ -264,7 +264,7 @@
         <section id="pros-directory-section" style="display: none;">
           <div class="section-header-row">
             <h2 class="section-title">
-              <span>🛡️</span> Especialistas y personas de confianza
+              <span>🏆</span> Especialistas recomendados y mejor puntuados
             </h2>
           </div>
           <div id="pros-directory-grid" class="pros-grid">
@@ -669,6 +669,25 @@
   </div>
 
   <!-- ========================================================
+       MODAL 6: PERFIL COMPLETO DEL ESPECIALISTA ("OTRO"), TRABAJOS Y RESEÑAS
+       ======================================================== -->
+  <div id="pro-profile-modal" class="modal-overlay">
+    <div class="modal-window pro-detail-modal-window">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <span style="font-size: 1.3rem;">🧰</span>
+          <h3 id="pro-modal-header-title">Perfil del Especialista</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal title="Cerrar">✕</button>
+      </div>
+
+      <div id="pro-profile-modal-body" class="modal-body">
+        <!-- Rendered dynamically by App.openProProfileModal -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
        BANNER DE INSTALACIÓN PWA
        ======================================================== -->
   <div id="pwa-install-banner" class="pwa-banner">
@@ -720,13 +739,13 @@
   <script src="./js/firebase-config.js"></script>
 
   <!-- Application Scripts -->
-  <script src="./js/geo.js?v=3.2"></script>
-  <script src="./js/data.js?v=3.2"></script>
-  <script src="./js/storage.js?v=3.2"></script>
-  <script src="./js/auth.js?v=3.2"></script>
-  <script src="./js/notifications.js?v=3.2"></script>
-  <script src="./js/chat.js?v=3.2"></script>
-  <script src="./js/pwa.js?v=3.2"></script>
-  <script src="./js/app.js?v=3.2"></script>
+  <script src="./js/geo.js?v=3.3"></script>
+  <script src="./js/data.js?v=3.3"></script>
+  <script src="./js/storage.js?v=3.3"></script>
+  <script src="./js/auth.js?v=3.3"></script>
+  <script src="./js/notifications.js?v=3.3"></script>
+  <script src="./js/chat.js?v=3.3"></script>
+  <script src="./js/pwa.js?v=3.3"></script>
+  <script src="./js/app.js?v=3.3"></script>
 </body>
 </html>

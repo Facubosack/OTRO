@@ -277,6 +277,51 @@ const App = {
     window.addEventListener('userLocationUpdated', () => {
       this.renderCurrentTab();
     });
+
+    // Auto-hide mobile keyboard when sliding/scrolling the screen
+    this.setupMobileKeyboardDismiss();
+  },
+
+  setupMobileKeyboardDismiss() {
+    let touchStartY = 0;
+    let touchStartX = 0;
+
+    const blurActiveInput = () => {
+      const active = document.activeElement;
+      if (
+        active &&
+        (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT')
+      ) {
+        active.blur();
+      }
+    };
+
+    document.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches.length === 1) {
+        touchStartY = e.touches[0].clientY;
+        touchStartX = e.touches[0].clientX;
+      }
+    }, { passive: true });
+
+    document.addEventListener('touchmove', (e) => {
+      if (!e.touches || e.touches.length !== 1) return;
+      const active = document.activeElement;
+      if (!active || (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA' && active.tagName !== 'SELECT')) {
+        return;
+      }
+
+      // Do not blur if the user is scrolling inside the autocomplete dropdown list
+      if (e.target && e.target.closest && e.target.closest('.geo-autocomplete-dropdown')) {
+        return;
+      }
+
+      const deltaY = Math.abs(e.touches[0].clientY - touchStartY);
+      const deltaX = Math.abs(e.touches[0].clientX - touchStartX);
+
+      if (deltaY > 10 || deltaX > 15) {
+        blurActiveInput();
+      }
+    }, { passive: true });
   },
 
   /* -------------------------------------------------------------
